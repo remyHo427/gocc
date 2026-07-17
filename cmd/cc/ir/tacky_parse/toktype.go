@@ -1,0 +1,45 @@
+package tackyparse
+
+type Toktype int
+
+const (
+	EOF Toktype = iota
+
+	//
+	RETURN
+	UNARY
+	BINARY
+	COPY
+	JUMP
+	JUMP_IF_ZERO
+	JUMP_IF_NOT_ZERO
+	LABEL
+
+	//
+	LSHIFT
+	RSHIFT
+	BAND
+	BOR
+	BXOR
+	TILDE
+	NOT
+	AND
+	OR
+	ADD
+	SUB
+	MUL
+	DIV
+	MOD
+	EQ
+	NEQ
+	LT
+	LEQ
+	GT
+	GEQ
+	SCOLON
+	ASSIGN
+
+	//
+	IDENT
+	INTEGER
+)

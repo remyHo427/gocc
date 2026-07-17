@@ -1,0 +1,17 @@
+*
+!/**/
+!*.*
+
+!makefile
+
+# generated files
+bin/
+*.s
+*.out
+tmp.*
+
+# scratch files
+*.txt
+
+# editor
+.vscode

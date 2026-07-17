@@ -1,0 +1,34 @@
+interface node = string String()
+
+enum unary_operator
+    = COMPLEMENT | NEGATE | NOT
+enum binary_operator
+    = ADD | SUB | MUL | DIV | MOD | BAND | BOR
+    | EQ | NEQ | LT | LEQ | GT | GEQ
+
+type expr = ConstantExpr(int Value)
+    | UnaryExpr(unary_operator Operator, expr Src)
+    | BinaryExpr(binary_operator Operator, expr Src, expr Dst)
+
+method ConstantExpr.String(e) {
+    return fmt.Printf("%d", e.Value)
+}
+method UnaryExpr.String(e) {
+    return join("unary", e.Operator, e.Src)
+}
+method BinaryExpr.String(e) {
+    return join("binary", e.Operator, e.Src, e.Dst)
+}
+
+type statement = ReturnStmt(expr Expr) 
+    | ExprStmt(expr Expr)
+
+method string ReturnStmt.String(s) {
+    return join("return", s.Expr)
+}
+method string ExprStmt.String(s) {
+    return join(s.Expr)
+}
+
+type function_definition = Function(string Name, statement Body)
+type program = Program(function_definition FuncDef)
