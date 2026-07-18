@@ -123,7 +123,12 @@ func compile_file(flags CmdFlags, file string) {
 	}
 
 	// use gcc to assemble and link
-	cmd = exec.Command("gcc", tmp_asm, "-o", flags.Output)
+	if flags.Compile {
+		cmd = exec.Command("gcc", "-c", tmp_asm)
+	} else {
+		cmd = exec.Command("gcc", tmp_asm, "-o", flags.Output)
+	}
+
 	if err := cmd.Run(); err != nil {
 		util.Exit_with_error(err)
 	}

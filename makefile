@@ -9,6 +9,8 @@ make:
 	@go run ./scripts/main.go build mycc
 
 test:
-	@go run ./scripts/main.go test mycc
+	@go test ./cmd/... 
+
+full_test: test make
 	@(cp $(BIN_PATH)/mycc $(TEST_DIR))
 	@(cd $(TEST_DIR) && ./test_all.sh)
