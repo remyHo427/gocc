@@ -13,10 +13,24 @@ func (n *Program) String() string {
 }
 
 type FunctionDefinition struct {
-	Name string
-	Body Stmt
+	Name  string
+	Items []BlockItem
 }
 
 func (n *FunctionDefinition) String() string {
-	return join(n.Name, n.Body)
+	return join(n.Name, n.Items)
+}
+
+type BlockItemType int
+
+const (
+	DECL BlockItemType = iota
+	STMT
+)
+
+type BlockItem struct {
+	Node
+	Type BlockItemType
+	Stmt Stmt
+	Decl Decl
 }

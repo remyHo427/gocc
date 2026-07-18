@@ -28,6 +28,7 @@ func TestAllBinaryOperators(t *testing.T) {
 
 func TestBinaryOperatorsAssociativity(t *testing.T) {
 	tt := []TestPair{
+		// left-to-right
 		{"arithmetic add", "1 + 2 + 3", "(binary ADD (binary ADD 1 2) 3)"},
 		{"arithmetic sub", "1 - 2 - 3", "(binary SUB (binary SUB 1 2) 3)"},
 		{"arithmetic mul", "1 * 2 * 3", "(binary MUL (binary MUL 1 2) 3)"},
@@ -46,6 +47,9 @@ func TestBinaryOperatorsAssociativity(t *testing.T) {
 		{"greater than", "1 > 2 > 3", "(binary GT (binary GT 1 2) 3)"},
 		{"less than or equal", "1 <= 2 <= 3", "(binary LEQ (binary LEQ 1 2) 3)"},
 		{"greater than or equal", "1 >= 2 >= 3", "(binary GEQ (binary GEQ 1 2) 3)"},
+
+		// right-to-left
+		{"assign", "1 = 2 = 3", "(assign 1 (assign 2 3))"},
 	}
 	check_expr(t, tt)
 }

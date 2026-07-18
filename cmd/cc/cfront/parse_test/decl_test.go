@@ -6,22 +6,16 @@ import (
 	"testing"
 )
 
-func TestReturnStmt(t *testing.T) {
+func TestDecl(t *testing.T) {
 	tt := []TestPair{
-		{"void return", "return;", "(return )"},
-		{"return with expr", "return 0;", "(return 0)"},
+		{"declare int", "int a = 0;", "(declaration a 0)"},
+		{"declare int no init", "int a;", "(declaration a )"},
+		{"declare int expr", "int a = 1 + 1;", "(declaration a (binary ADD 1 1))"},
 	}
-	check_stmt(t, tt)
-}
-func TestExprStmt(t *testing.T) {
-	tt := []TestPair{
-		{"expr stmt", "1;", "(1)"},
-		{"expr stmt with no expression (null stmt)", ";", "(null)"},
-	}
-	check_stmt(t, tt)
+	check_decl(t, tt)
 }
 
-func check_stmt(t *testing.T, tt []TestPair) {
+func check_decl(t *testing.T, tt []TestPair) {
 	t.Helper()
 
 	for _, test := range tt {
@@ -29,7 +23,7 @@ func check_stmt(t *testing.T, tt []TestPair) {
 			l := lex.New(test.src)
 			p := parse.New(l)
 
-			ast := p.ParseStmt()
+			ast := p.ParseDecl()
 			actual := ast.String()
 			if actual != test.expect {
 				t.Errorf("expected \"%s\", got \"%s\"", test.expect, actual)

@@ -34,13 +34,13 @@ func (p *Parser) parse_return_stmt() *ast.ReturnStmt {
 	return stmt
 }
 
-func (p *Parser) parse_expr_stmt() *ast.ExprStmt {
+func (p *Parser) parse_expr_stmt() ast.Stmt {
 	stmt := &ast.ExprStmt{}
 
 	// can be a null stmt
 	if p.is(lex.SCOLON) {
 		p.adv()
-		return stmt
+		return &ast.NullStmt{}
 	}
 
 	if expr := p.ParseExpr(LOWEST); expr == nil {

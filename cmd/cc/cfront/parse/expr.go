@@ -82,9 +82,23 @@ func (p *Parser) ParseExpr(currPrec Prec) ast.Expr {
 			lex.LSHIFT, lex.LT, lex.GT, lex.LEQ, lex.GEQ, lex.EQ,
 			lex.NEQ, lex.BAND, lex.BXOR, lex.BOR, lex.AND, lex.OR,
 			lex.DOT:
-			left = p.parseInfixOperator(left)
+			if expr := p.parseInfixOperator(left); expr == nil {
+				return nil
+			} else {
+				left = expr
+			}
+		case lex.ASSIGN:
+			p.adv()
+			if right := p.ParseExpr(p.prec()); right == nil {
+				return nil
+			} else {
+				left = &ast.AssignmentExpr{
+					Left:  left,
+					Right: right,
+				}
+			}
 		default:
-			util.Exit_with_printf("illegal state")
+			util.Exit_with_printf("illegal state\n")
 		}
 	}
 

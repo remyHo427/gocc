@@ -42,12 +42,21 @@ func (p *Parser) parse_function_definition() ast.FunctionDefinition {
 	p.exadv(lex.RPAREN)
 
 	p.exadv(lex.LBRACE)
-	stmt := p.ParseStmt()
+
+	items := []ast.BlockItem{}
+	for !p.is(lex.RBRACE) {
+		if item := p.parse_block_item(); item == nil {
+			util.Exit_with_println("failed to parse function body\n")
+		} else {
+			items = append(items, *item)
+		}
+	}
+
 	p.exadv(lex.RBRACE)
 
 	return ast.FunctionDefinition{
-		Name: id,
-		Body: stmt,
+		Name:  id,
+		Items: items,
 	}
 }
 
