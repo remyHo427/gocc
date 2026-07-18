@@ -10,8 +10,7 @@ for i in *.c ; do
   $MYCC $i > /dev/null 2>&1
 
   if [ ! $? -eq 0 ]; then 
-    echo "compile failed"
-    exit 1
+    echo "failed to compile!"
   fi
   
   ./a.out

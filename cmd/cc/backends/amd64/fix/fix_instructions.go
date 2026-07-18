@@ -21,7 +21,8 @@ func FixInstructions(program asm.Program) asm.Program {
 
 	for _, instruction := range program.FuncDef.Ins {
 		switch t := instruction.(type) {
-		case *asm.Return, *asm.Unary, *asm.AllocateStack, *asm.Cdq:
+		case *asm.Return, *asm.Unary, *asm.AllocateStack, *asm.Cdq,
+			*asm.Jump, *asm.JumpCC, *asm.Label, *asm.SetCC:
 			ins = append(ins, t)
 		case *asm.Comparison:
 			if t.Value2.Type() == asm.IMM {

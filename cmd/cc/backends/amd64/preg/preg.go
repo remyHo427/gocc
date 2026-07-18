@@ -24,7 +24,7 @@ func (pg *PseudoRegisterReplacer) Replace(program asm.Program) asm.Program {
 
 	for _, instruction := range program.FuncDef.Ins {
 		switch t := instruction.(type) {
-		case *asm.Cdq, *asm.Return:
+		case *asm.Cdq, *asm.Return, *asm.Jump, *asm.JumpCC, *asm.Label:
 			ins = append(ins, t)
 		case *asm.Move:
 			ins = append(ins, &asm.Move{
