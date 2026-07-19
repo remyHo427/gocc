@@ -49,7 +49,7 @@ func (g *TackyGenerator) generate_declaration(decl ast.Decl) {
 	switch t := decl.(type) {
 	case *ast.Declaration:
 		if t.Init != nil {
-			v := Variable{t.Name}
+			v := Variable{Name: t.Name}
 			rhs := g.generate_value(t.Init)
 			g.push(&Copy{Src: rhs, Dst: &v})
 		}

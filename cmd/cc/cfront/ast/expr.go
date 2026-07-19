@@ -46,7 +46,7 @@ type VarExpr struct {
 
 func (e *VarExpr) ExprNode() {}
 func (e *VarExpr) String() string {
-	return join("var", e.Name)
+	return e.Name
 }
 
 type AssignmentExpr struct {

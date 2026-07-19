@@ -15,7 +15,7 @@ func TestReturnStmt(t *testing.T) {
 }
 func TestExprStmt(t *testing.T) {
 	tt := []TestPair{
-		{"expr stmt", "1;", "(1)"},
+		{"expr stmt", "1;", "1"},
 		{"expr stmt with no expression (null stmt)", ";", "(null)"},
 	}
 	check_stmt(t, tt)

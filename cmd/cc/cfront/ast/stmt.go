@@ -20,7 +20,7 @@ type ExprStmt struct {
 
 func (s *ExprStmt) StmtNode() {}
 func (s *ExprStmt) String() string {
-	return join(s.Expr)
+	return s.Expr.String()
 }
 
 type NullStmt struct{}

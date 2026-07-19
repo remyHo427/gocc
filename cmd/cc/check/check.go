@@ -14,11 +14,11 @@ type Checker struct {
 func New() Checker {
 	return Checker{
 		store:     map[string]string{},
-		make_name: make_new_namer("var_"),
+		make_name: make_namer(),
 	}
 }
 
-func (c *Checker) check(tree ast.Program) ast.Program {
+func (c *Checker) Check(tree ast.Program) ast.Program {
 	result := []ast.BlockItem{}
 
 	for _, item := range tree.FuncDef.Items {
@@ -70,7 +70,8 @@ func (c *Checker) resolve_stmt(stmt ast.Stmt) ast.Stmt {
 }
 
 func (c *Checker) resolve_declaration(decl ast.Declaration) *ast.Declaration {
-	if _, ok := c.store[decl.Name]; ok {
+	_, ok := c.store[decl.Name]
+	if ok {
 		util.Exit_with_printf("variable %s is already declared!\n", decl.Name)
 		return nil
 	}
@@ -90,9 +91,11 @@ func (c *Checker) resolve_declaration(decl ast.Declaration) *ast.Declaration {
 
 func (c *Checker) resolve_expr(expr ast.Expr) ast.Expr {
 	switch t := expr.(type) {
+	case *ast.ConstantExpr:
+		return t
 	case *ast.AssignmentExpr:
 		if _, ok := t.Left.(*ast.VarExpr); !ok {
-			util.Exit_with_printf("Invalid lvalue!, got %v (%T)",
+			util.Exit_with_printf("Invalid lvalue!, got %v (%T)\n",
 				t.Left, t.Left)
 			return nil
 		} else {
@@ -103,7 +106,7 @@ func (c *Checker) resolve_expr(expr ast.Expr) ast.Expr {
 		}
 	case *ast.VarExpr:
 		if v, ok := c.store[t.Name]; !ok {
-			util.Exit_with_printf("Undeclared variable!, got %v (%T)",
+			util.Exit_with_printf("Undeclared variable!, got %v (%T)\n",
 				t.Name, t.Name)
 			return nil
 		} else {
@@ -120,16 +123,19 @@ func (c *Checker) resolve_expr(expr ast.Expr) ast.Expr {
 			Operator: t.Operator,
 			Expr:     c.resolve_expr(t.Expr),
 		}
+	case nil:
+		// do nothing
+		return nil
 	default:
-		util.Exit_with_printf("unknown expr %v (%T)", expr, expr)
+		util.Exit_with_printf("unknown expr %v (%T)\n", expr, expr)
 		return nil
 	}
 }
 
-func make_new_namer(prefix string) func(string) string {
+func make_namer() func(string) string {
 	counter := 0
 	return func(var_name string) string {
-		name := fmt.Sprintf("%s%s_%d", prefix, var_name, counter)
+		name := fmt.Sprintf("%s.%d", var_name, counter)
 		counter++
 		return name
 	}

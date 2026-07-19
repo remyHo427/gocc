@@ -1,5 +1,7 @@
 package ast
 
+import "cc260717/cmd/cc/util"
+
 type Node interface {
 	String() string
 }
@@ -33,4 +35,16 @@ type BlockItem struct {
 	Type BlockItemType
 	Stmt Stmt
 	Decl Decl
+}
+
+func (bi *BlockItem) String() string {
+	switch bi.Type {
+	case STMT:
+		return bi.Stmt.String()
+	case DECL:
+		return bi.Decl.String()
+	default:
+		util.Exit_with_println("cannot string block item")
+		return ""
+	}
 }

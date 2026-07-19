@@ -3,6 +3,7 @@ package parse
 import (
 	"cc260717/cmd/cc/cfront/ast"
 	"cc260717/cmd/cc/cfront/lex"
+	"cc260717/cmd/cc/util"
 )
 
 func (p *Parser) ParseBlockItem() *ast.BlockItem {
@@ -26,6 +27,20 @@ func (p *Parser) ParseBlockItem() *ast.BlockItem {
 	}
 
 	return &item
+}
+func (p *Parser) ParseBlockItems() []ast.BlockItem {
+	items := []ast.BlockItem{}
+
+	for !p.is(lex.RBRACE) {
+		if item := p.ParseBlockItem(); item == nil {
+			util.Exit_with_println("failed to parse function body\n")
+		} else {
+			items = append(items, *item)
+		}
+	}
+
+	p.exadv(lex.RBRACE)
+	return items
 }
 
 func (p *Parser) ParseDecl() ast.Decl {
