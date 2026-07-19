@@ -9,8 +9,9 @@ make:
 	@go run ./scripts/main.go build mycc
 
 test:
-	@go test ./cmd/... 
+	@go test ./cmd/... | grep -E "^[^?]"
 
-full_test: test make
+compile_test: $(BIN_PATH)/mycc
 	@(cp $(BIN_PATH)/mycc $(TEST_DIR))
 	@(cd $(TEST_DIR) && ./test_all.sh)
+

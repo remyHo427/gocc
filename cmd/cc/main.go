@@ -9,6 +9,7 @@ import (
 
 	"cc260717/cmd/cc/backends/amd64"
 	"cc260717/cmd/cc/backends/amd64/cg"
+	"cc260717/cmd/cc/cfront/check"
 	"cc260717/cmd/cc/cfront/lex"
 	"cc260717/cmd/cc/cfront/parse"
 	"cc260717/cmd/cc/ir/tacky"
@@ -138,9 +139,14 @@ func compile_file(flags CmdFlags, file string) {
 func compile(src string) string {
 	l := lex.New(src)
 	p := parse.New(l)
-	ast := p.Parse()
 	t := tacky.New()
+	c := check.New()
 	g := cg.New()
 
-	return g.Generate(amd64.ToAsm(t.Generate(ast)))
+	ast := p.Parse()
+	ast = c.Check(ast)
+	tacky := t.Generate(ast)
+	asm := amd64.ToAsm(tacky)
+
+	return g.Generate(asm)
 }

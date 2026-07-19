@@ -5,20 +5,18 @@ import (
 	"os"
 	"strconv"
 	"unicode"
-
-	"cc260717/cmd/cc/util"
 )
 
 type Lexer struct {
-	src []rune
 	sp  int
 	len int
+	src []rune
 }
 
 func New(src string) *Lexer {
 	return &Lexer{
-		src: []rune(src),
 		len: len(src),
+		src: []rune(src),
 	}
 }
 func (l *Lexer) Lex() Token {
@@ -117,7 +115,11 @@ func (l *Lexer) Lex() Token {
 			l.match("", ASSIGN, &ttype)
 			return tok(ttype)
 		default:
-			util.Exit_with_printf("unknown character '%c'\n", c)
+			l.adv()
+			return Token{
+				Type:    ERR,
+				Literal: string(c),
+			}
 		}
 	}
 
@@ -194,7 +196,7 @@ func (l Lexer) peek() rune {
 func (l *Lexer) adv() {
 	l.sp++
 }
-func (l Lexer) isend() bool {
+func (l *Lexer) isend() bool {
 	return l.sp >= l.len
 }
 func tok(ttype Toktype) Token {

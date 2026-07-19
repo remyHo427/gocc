@@ -4,9 +4,9 @@ import (
 	"testing"
 
 	"cc260717/cmd/cc/cfront/ast"
+	"cc260717/cmd/cc/cfront/check"
 	"cc260717/cmd/cc/cfront/lex"
 	"cc260717/cmd/cc/cfront/parse"
-	"cc260717/cmd/cc/check"
 )
 
 type TestPair struct {

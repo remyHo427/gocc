@@ -111,7 +111,7 @@ func (c *Checker) resolve_expr(expr ast.Expr) ast.Expr {
 		}
 	case *ast.VarExpr:
 		if v, ok := c.store[t.Name]; !ok {
-			util.Exit_with_printf("Undeclared variable!, got %v (%T)\n",
+			util.Exit_with_printf("Undeclared variable! got %v (%T)\n",
 				t.Name, t.Name)
 			return nil
 		} else {

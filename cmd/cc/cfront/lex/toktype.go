@@ -5,6 +5,7 @@ type Toktype int
 
 const (
 	EOF Toktype = iota
+	ERR
 
 	//
 	IDENT
