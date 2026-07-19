@@ -19,22 +19,27 @@ func TestDeclaration(t *testing.T) {
 		{
 			"declaration with no init",
 			"int a;}", // the trailing } is required
-			"(declaration a )",
+			"(declaration a.0 )",
 		},
 		{
 			"declaration with integer init",
 			"int a = 0;}",
-			"(declaration a 0)",
+			"(declaration a.0 0)",
 		},
 		{
 			"declaration with expr init",
 			"int a = 1 + 2;}",
-			"(declaration a (binary ADD 1 2))",
+			"(declaration a.0 (binary ADD 1 2))",
 		},
 		{
 			"declaration with later init",
 			"int a; a = 0;}",
-			"(declaration a ) (assign a 0)",
+			"(declaration a.0 ) (assign a.0 0)",
+		},
+		{
+			"multiple declarations",
+			"int a; int b;}",
+			"(declaration a.0 ) (declaration b.1 )",
 		},
 	}
 

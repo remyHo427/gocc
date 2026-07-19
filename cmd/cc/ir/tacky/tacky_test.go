@@ -31,7 +31,7 @@ func TestUnary(t *testing.T) {
 }
 func TestDecl(t *testing.T) {
 	checkExprStmt(t, "declaration no init", "int a;")
-	// checkExprStmt(t, "declaration with init", "int a = 0;", "copy 0 a.0;")
+	checkExprStmt(t, "declaration with init", "int a = 0;", "copy 0 a.0;")
 }
 
 func TestBinary(t *testing.T) {
@@ -51,10 +51,6 @@ func TestBinary(t *testing.T) {
 	checkExprStmt(t, "greater than", "1 > 2;", "binary > 1 2 tmp.0;")
 	checkExprStmt(t, "less than or equal", "1 <= 2;", "binary <= 1 2 tmp.0;")
 	checkExprStmt(t, "greater than or equal", "1 >= 2;", "binary >= 1 2 tmp.0;")
-	// checkExprStmt(t, "assignment", "a = 1 + 1;",
-	// 	"binary + 1 1 tmp.0;",
-	// 	"copy tmp.0 a;",
-	// )
 
 	checkExprStmt(t, "nested", "1 + 2 + 3;",
 		"binary + 1 2 tmp.0;",

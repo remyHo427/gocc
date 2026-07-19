@@ -25,7 +25,12 @@ func (c *Checker) Check(tree ast.Program) ast.Program {
 		result = append(result, *c.resolve_block_item(item))
 	}
 
-	return tree
+	return ast.Program{
+		FuncDef: ast.FunctionDefinition{
+			Name:  tree.FuncDef.Name,
+			Items: result,
+		},
+	}
 }
 
 func (c *Checker) resolve_block_item(item ast.BlockItem) *ast.BlockItem {
