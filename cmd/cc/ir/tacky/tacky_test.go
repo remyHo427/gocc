@@ -97,8 +97,8 @@ func GenerateTacky(src string) Program {
 
 	return generator.Generate(ast.Program{
 		FuncDef: ast.FunctionDefinition{
-			Name: "main",
-			Body: p.ParseStmt(),
+			Name:  "main",
+			Items: []ast.BlockItem{*p.ParseBlockItem()},
 		},
 	})
 }

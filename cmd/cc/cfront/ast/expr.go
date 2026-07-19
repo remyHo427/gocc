@@ -10,7 +10,6 @@ type Expr interface {
 	ExprNode()
 }
 
-type TestExpr struct{ Value int64 }
 type ConstantExpr struct {
 	Value int64
 }

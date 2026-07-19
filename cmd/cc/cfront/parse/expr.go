@@ -129,6 +129,10 @@ func (p *Parser) parsePrefix() ast.Expr {
 		return &ast.ConstantExpr{
 			Value: p.curr.IntVal,
 		}
+	case lex.IDENT:
+		return &ast.VarExpr{
+			Name: p.curr.Literal,
+		}
 	case lex.DEC, lex.SUB, lex.BCOMP, lex.NOT:
 		return p.parse_prefix_operator()
 	case lex.LPAREN:

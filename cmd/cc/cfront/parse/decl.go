@@ -5,7 +5,7 @@ import (
 	"cc260717/cmd/cc/cfront/lex"
 )
 
-func (p *Parser) parse_block_item() *ast.BlockItem {
+func (p *Parser) ParseBlockItem() *ast.BlockItem {
 	item := ast.BlockItem{}
 
 	switch p.peek() {
@@ -13,12 +13,14 @@ func (p *Parser) parse_block_item() *ast.BlockItem {
 		if decl := p.ParseDecl(); decl == nil {
 			return nil
 		} else {
+			item.Type = ast.DECL
 			item.Decl = decl
 		}
 	default:
 		if stmt := p.ParseStmt(); stmt == nil {
 			return nil
 		} else {
+			item.Type = ast.STMT
 			item.Stmt = stmt
 		}
 	}

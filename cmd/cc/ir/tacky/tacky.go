@@ -30,9 +30,32 @@ func (g *TackyGenerator) Generate(tree ast.Program) Program {
 
 func (g *TackyGenerator) generate_function(tree ast.FunctionDefinition) Function {
 	g.clear()
-	g.generate_instructions(tree.Body)
+
+	for _, item := range tree.Items {
+		switch item.Type {
+		case ast.DECL:
+			g.generate_declaration(item.Decl)
+		case ast.STMT:
+			g.generate_instructions(item.Stmt)
+		default:
+			util.Exit_with_printf("unknown block item %v (%T)\n", item, item)
+		}
+	}
 
 	return Function{Name: tree.Name, Ins: g.ins}
+}
+
+func (g *TackyGenerator) generate_declaration(decl ast.Decl) {
+	switch t := decl.(type) {
+	case *ast.Declaration:
+		if t.Init != nil {
+			v := Variable{t.Name}
+			rhs := g.generate_value(t.Init)
+			g.push(&Copy{Src: rhs, Dst: &v})
+		}
+	default:
+		util.Exit_with_printf("unknown decl %v (%T)\n", t, t)
+	}
 }
 
 func (g *TackyGenerator) generate_instructions(body ast.Stmt) {
@@ -41,6 +64,10 @@ func (g *TackyGenerator) generate_instructions(body ast.Stmt) {
 		g.push(&Return{Value: g.generate_value(t.Expr)})
 	case *ast.ExprStmt:
 		g.generate_value(t.Expr)
+	case *ast.NullStmt:
+		// do nothing
+	default:
+		util.Exit_with_printf("unknown stmt %v (%T)\n", t, t)
 	}
 }
 
@@ -52,6 +79,13 @@ func (g *TackyGenerator) generate_value(expr ast.Expr) Value {
 		return g.generate_unary_expr_value(*t)
 	case *ast.BinaryExpr:
 		return g.generate_binary_expr_value(*t)
+	case *ast.AssignmentExpr:
+		rhs := g.generate_value(t.Right)
+		lhs := g.generate_value(t.Left)
+		g.push(&Copy{Src: rhs, Dst: lhs})
+		return lhs
+	case *ast.VarExpr:
+		return &Variable{Name: t.Name}
 	case nil:
 		// do nothing
 		return nil

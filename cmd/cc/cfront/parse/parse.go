@@ -45,7 +45,7 @@ func (p *Parser) parse_function_definition() ast.FunctionDefinition {
 
 	items := []ast.BlockItem{}
 	for !p.is(lex.RBRACE) {
-		if item := p.parse_block_item(); item == nil {
+		if item := p.ParseBlockItem(); item == nil {
 			util.Exit_with_println("failed to parse function body\n")
 		} else {
 			items = append(items, *item)
