@@ -4,12 +4,14 @@ import (
 	"cc260717/cmd/cc/cfront/ast"
 	"cc260717/cmd/cc/cfront/lex"
 	"cc260717/cmd/cc/util"
+	"fmt"
 )
 
 type Parser struct {
-	l    *lex.Lexer
-	curr lex.Token
-	next lex.Token
+	l      *lex.Lexer
+	curr   lex.Token
+	next   lex.Token
+	Errors []error
 }
 
 func New(l *lex.Lexer) *Parser {
@@ -60,12 +62,23 @@ func (p *Parser) exadv(ttype lex.Toktype) {
 	p.adv()
 }
 func (p *Parser) adv() {
-	p.curr = p.next
-	p.next = p.l.Lex()
+	tok := p.l.Lex()
+	if tok.Type != lex.ERR {
+		p.curr = p.next
+		p.next = tok
+		return
+	} else {
+		p.tok_err(tok)
+		p.adv()
+	}
 }
 func (p *Parser) expect(ttype lex.Toktype) {
 	if tok := p.curr; tok.Type != ttype {
 		util.Exit_with_printf("expect %s got %s\n",
 			ttype.String(), tok.Type.String())
 	}
+}
+func (p *Parser) tok_err(tok lex.Token) {
+	p.Errors = append(p.Errors, fmt.Errorf("%s:%d %s: %s\n",
+		tok.File, tok.Line, tok.Error.Error(), tok.ErrorStr))
 }

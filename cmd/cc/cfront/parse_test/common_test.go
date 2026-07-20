@@ -17,7 +17,7 @@ func check_expr(t *testing.T, tt []TestPair) {
 
 	for _, test := range tt {
 		t.Run(test.name, func(t *testing.T) {
-			l := lex.New(test.src)
+			l := lex.New("", test.src)
 			p := parse.New(l)
 
 			ast := p.ParseExpr(parse.LOWEST)

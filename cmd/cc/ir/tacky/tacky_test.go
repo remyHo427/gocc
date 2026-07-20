@@ -103,7 +103,7 @@ func checkExprStmt(t *testing.T, name string, src string, expected ...string) {
 
 func GenerateTacky(src string) Program {
 	generator := New()
-	p := parse.New(lex.New(src))
+	p := parse.New(lex.New("", src))
 	checker := check.New()
 
 	program := ast.Program{

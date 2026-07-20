@@ -2,7 +2,6 @@ package lex
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"unicode"
 )
@@ -10,13 +9,22 @@ import (
 type Lexer struct {
 	sp  int
 	len int
+
+	file string
+	col  int
+	line int
+
 	src []rune
 }
 
-func New(src string) *Lexer {
+func New(filename string, src string) *Lexer {
 	return &Lexer{
-		len: len(src),
-		src: []rune(src),
+		sp:   0,
+		file: filename,
+		col:  0,
+		line: 1,
+		len:  len(src),
+		src:  []rune(src),
 	}
 }
 func (l *Lexer) Lex() Token {
@@ -24,6 +32,10 @@ func (l *Lexer) Lex() Token {
 		c := l.peek()
 
 		if unicode.IsSpace(c) {
+			if c == '\n' {
+				l.line++
+				l.col = 0
+			}
 			l.adv()
 			continue
 		}
@@ -117,8 +129,12 @@ func (l *Lexer) Lex() Token {
 		default:
 			l.adv()
 			return Token{
-				Type:    ERR,
-				Literal: string(c),
+				Type:     ERR,
+				Error:    ErrInvalidCharacter,
+				ErrorStr: fmt.Sprintf("'%c'", c),
+				File:     l.file,
+				Col:      l.col,
+				Line:     l.line,
 			}
 		}
 	}
@@ -165,9 +181,14 @@ func (l *Lexer) num() Token {
 	s := string(l.src[start:end])
 	n, err := strconv.ParseInt(s, 10, 64)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, fmt.Errorf("error: %v", err))
-		os.Exit(1)
-		return Token{}
+		return Token{
+			Type:     ERR,
+			Error:    ErrInvalidIntLiteral,
+			ErrorStr: err.Error(),
+			File:     l.file,
+			Col:      l.col,
+			Line:     l.line,
+		}
 	}
 
 	return Token{Type: INT_CONST, IntVal: n, Literal: s}
@@ -194,6 +215,7 @@ func (l Lexer) peek() rune {
 	return l.src[l.sp]
 }
 func (l *Lexer) adv() {
+	l.col++
 	l.sp++
 }
 func (l *Lexer) isend() bool {

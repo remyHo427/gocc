@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"cc260717/cmd/cc/backends/amd64"
@@ -107,7 +108,12 @@ func compile_file(flags CmdFlags, file string) {
 	}
 	os.Remove(tmp_file)
 
-	result := compile(string(src))
+	file_fullpath, err := filepath.Abs(file)
+	if err != nil {
+		util.Exit_with_error(err)
+	}
+
+	result := compile(file_fullpath, string(src))
 	f, err := os.Create(tmp_asm)
 	if err != nil {
 		util.Exit_with_error(err)
@@ -136,17 +142,29 @@ func compile_file(flags CmdFlags, file string) {
 	os.Remove(tmp_asm)
 }
 
-func compile(src string) string {
-	l := lex.New(src)
+func compile(filename string, src string) string {
+	l := lex.New(filename, src)
 	p := parse.New(l)
 	t := tacky.New()
 	c := check.New()
 	g := cg.New()
 
 	ast := p.Parse()
+	if len(p.Errors) != 0 {
+		for _, err := range p.Errors {
+			print_errors(err)
+		}
+		os.Exit(1)
+		return ""
+	}
+
 	ast = c.Check(ast)
 	tacky := t.Generate(ast)
 	asm := amd64.ToAsm(tacky)
 
 	return g.Generate(asm)
+}
+
+func print_errors(err error) {
+	fmt.Fprintf(os.Stderr, "%s", err)
 }

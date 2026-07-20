@@ -3,18 +3,18 @@ package lex
 import "testing"
 
 func TestEmptyString(t *testing.T) {
-	l := New("")
+	l := New("", "")
 	seq := []Toktype{}
 	tokseq(*l, seq, t)
 }
 func TestSpaceOnly(t *testing.T) {
-	l := New("\f\n\r\t\v ")
+	l := New("", "\f\n\r\t\v ")
 	seq := []Toktype{}
 	tokseq(*l, seq, t)
 }
 
 func TestKeywords(t *testing.T) {
-	l := New(`auto break case char const continue default do
+	l := New("", `auto break case char const continue default do
 	double else enum extern float for goto if int long register
 	return short signed sizeof static struct switch typedef
 	union unsigned void volatile while`)
@@ -29,14 +29,14 @@ func TestKeywords(t *testing.T) {
 }
 
 func TestIdentifiers(t *testing.T) {
-	l := New(`a Toktype a0 a00 __test__`)
+	l := New("", `a Toktype a0 a00 __test__`)
 	seq := []Toktype{
 		IDENT, IDENT, IDENT, IDENT, IDENT,
 	}
 	tokseq(*l, seq, t)
 }
 func TestInteger(t *testing.T) {
-	l := New(`0 1 10 010`)
+	l := New("", `0 1 10 010`)
 	seq := []Toktype{
 		INT_CONST, INT_CONST, INT_CONST, INT_CONST,
 	}
@@ -44,7 +44,7 @@ func TestInteger(t *testing.T) {
 }
 
 func TestOperators(t *testing.T) {
-	l := New(`
+	l := New("", `
 		[ ] ( ) . -> ++ -- & * + - ~ ! / % << >> < > <=
 		>= == != ^ && || ? : = *= /= %= -= <<= >>= &= ^=
 		|= , { } ; ...
