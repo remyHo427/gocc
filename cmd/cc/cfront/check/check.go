@@ -66,6 +66,12 @@ func (c *Checker) resolve_stmt(stmt ast.Stmt) ast.Stmt {
 		return &ast.ExprStmt{Expr: c.resolve_expr(t.Expr)}
 	case *ast.ReturnStmt:
 		return &ast.ReturnStmt{Expr: c.resolve_expr(t.Expr)}
+	case *ast.IfStmt:
+		return &ast.IfStmt{
+			Condition: c.resolve_expr(t.Condition),
+			Then:      c.resolve_stmt(t.Then),
+			Else:      c.resolve_stmt(t.Else),
+		}
 	case *ast.NullStmt:
 		return &ast.NullStmt{}
 	default:
@@ -127,6 +133,12 @@ func (c *Checker) resolve_expr(expr ast.Expr) ast.Expr {
 		return &ast.UnaryExpr{
 			Operator: t.Operator,
 			Expr:     c.resolve_expr(t.Expr),
+		}
+	case *ast.TernaryExpr:
+		return &ast.TernaryExpr{
+			Condition: c.resolve_expr(t.Condition),
+			Then:      c.resolve_expr(t.Then),
+			Else:      c.resolve_expr(t.Else),
 		}
 	case nil:
 		// do nothing

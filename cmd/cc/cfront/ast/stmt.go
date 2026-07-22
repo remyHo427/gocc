@@ -29,3 +29,14 @@ func (s *NullStmt) StmtNode() {}
 func (s *NullStmt) String() string {
 	return join("null")
 }
+
+type IfStmt struct {
+	Condition Expr
+	Then      Stmt
+	Else      Stmt
+}
+
+func (s *IfStmt) StmtNode() {}
+func (s *IfStmt) String() string {
+	return join("if", s.Condition, s.Then, s.Else)
+}

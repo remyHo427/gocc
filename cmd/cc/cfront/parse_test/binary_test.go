@@ -22,6 +22,7 @@ func TestAllBinaryOperators(t *testing.T) {
 		{"greater than", "1 > 1", "(binary GT 1 1)"},
 		{"less than or equal", "1 <= 1", "(binary LEQ 1 1)"},
 		{"greater than or equal", "1 >= 1", "(binary GEQ 1 1)"},
+		{"ternary", "1 ? 1 : 0", "(ternary 1 1 0)"},
 	}
 	check_expr(t, tt)
 }
@@ -50,6 +51,10 @@ func TestBinaryOperatorsAssociativity(t *testing.T) {
 
 		// right-to-left
 		{"assign", "1 = 2 = 3", "(assign 1 (assign 2 3))"},
+
+		// 1 ? (2 ? 3 : 4) : (5 ? 6 : 7)
+		{"ternary", "1 ? 2 ? 3 : 4 : 5 ? 6 : 7",
+			"(ternary 1 (ternary 2 3 4) (ternary 5 6 7))"},
 	}
 	check_expr(t, tt)
 }

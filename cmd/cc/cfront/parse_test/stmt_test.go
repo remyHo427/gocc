@@ -20,6 +20,15 @@ func TestExprStmt(t *testing.T) {
 	}
 	check_stmt(t, tt)
 }
+func TestIfStmt(t *testing.T) {
+	tt := []TestPair{
+		{"only if", "if (1) 1;", "(if 1 1 )"},
+		{"if and else", "if (1) 1; else 0;", "(if 1 1 0)"},
+		{"chained if", "if (0) 0; else if (1) 1; else 2;",
+			"(if 0 0 (if 1 1 2))"},
+	}
+	check_stmt(t, tt)
+}
 
 func check_stmt(t *testing.T, tt []TestPair) {
 	t.Helper()

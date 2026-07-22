@@ -56,5 +56,16 @@ type AssignmentExpr struct {
 
 func (e *AssignmentExpr) ExprNode() {}
 func (e *AssignmentExpr) String() string {
-	return join("assign", e.Left.String(), e.Right.String())
+	return join("assign", e.Left, e.Right)
+}
+
+type TernaryExpr struct {
+	Condition Expr
+	Then      Expr
+	Else      Expr
+}
+
+func (e *TernaryExpr) ExprNode() {}
+func (e *TernaryExpr) String() string {
+	return join("ternary", e.Condition, e.Then, e.Else)
 }

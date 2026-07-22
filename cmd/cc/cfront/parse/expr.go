@@ -97,6 +97,13 @@ func (p *Parser) ParseExpr(currPrec Prec) ast.Expr {
 					Right: right,
 				}
 			}
+		case lex.QMARK:
+			p.adv()
+			if expr := p.parseTernaryOperator(left); expr == nil {
+				return nil
+			} else {
+				left = expr
+			}
 		default:
 			util.Exit_with_printf("illegal state\n")
 		}
@@ -105,7 +112,7 @@ func (p *Parser) ParseExpr(currPrec Prec) ast.Expr {
 	return left
 }
 
-func (p *Parser) parseInfixOperator(left ast.Expr) ast.Expr {
+func (p *Parser) parseInfixOperator(left ast.Expr) *ast.BinaryExpr {
 	expr := &ast.BinaryExpr{
 		Operator: p.peek(),
 		Left:     left,
@@ -118,6 +125,29 @@ func (p *Parser) parseInfixOperator(left ast.Expr) ast.Expr {
 		return nil
 	} else {
 		expr.Right = right
+	}
+
+	return expr
+}
+
+func (p *Parser) parseTernaryOperator(left ast.Expr) *ast.TernaryExpr {
+	expr := &ast.TernaryExpr{
+		Condition: left,
+	}
+
+	if Then := p.ParseExpr(LOWEST); Then == nil {
+		return nil
+	} else {
+		expr.Then = Then
+	}
+	p.adv()
+
+	p.exadv(lex.COLON)
+
+	if Else := p.ParseExpr(p.prec()); Else == nil {
+		return nil
+	} else {
+		expr.Else = Else
 	}
 
 	return expr
