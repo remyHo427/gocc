@@ -74,6 +74,9 @@ func (c *Checker) resolve_stmt(stmt ast.Stmt) ast.Stmt {
 		}
 	case *ast.NullStmt:
 		return &ast.NullStmt{}
+	case nil:
+		// do nothing
+		return nil
 	default:
 		util.Exit_with_printf("unknown stmt %v (%T)\n", t, t)
 		return nil

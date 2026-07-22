@@ -64,11 +64,36 @@ func (g *TackyGenerator) generate_instructions(body ast.Stmt) {
 		g.push(&Return{Value: g.generate_value(t.Expr)})
 	case *ast.ExprStmt:
 		g.generate_value(t.Expr)
+	case *ast.IfStmt:
+		g.generate_if_stmt(*t)
 	case *ast.NullStmt:
 		// do nothing
 	default:
 		util.Exit_with_printf("unknown stmt %v (%T)\n", t, t)
 	}
+}
+
+func (g *TackyGenerator) generate_if_stmt(stmt ast.IfStmt) {
+	var end_label = g.new_label()
+	var else_label = g.new_label()
+	var condition = g.generate_value(stmt.Condition)
+
+	if stmt.Else != nil {
+		g.push(&JumpIfZero{Condition: condition, Target: else_label})
+	} else {
+		g.push(&JumpIfZero{Condition: condition, Target: end_label})
+	}
+
+	g.generate_instructions(stmt.Then)
+	g.push(&Jump{Target: end_label})
+
+	// generate else part if it exists
+	if stmt.Else != nil {
+		g.push(&Label{Name: else_label})
+		g.generate_instructions(stmt.Else)
+	}
+
+	g.push(&Label{Name: end_label})
 }
 
 func (g *TackyGenerator) generate_value(expr ast.Expr) Value {
@@ -86,6 +111,8 @@ func (g *TackyGenerator) generate_value(expr ast.Expr) Value {
 		return lhs
 	case *ast.VarExpr:
 		return &Variable{Name: t.Name}
+	case *ast.TernaryExpr:
+		return g.generate_ternary_expr_value(*t)
 	case nil:
 		// do nothing
 		return nil
@@ -95,6 +122,23 @@ func (g *TackyGenerator) generate_value(expr ast.Expr) Value {
 	}
 }
 
+func (g *TackyGenerator) generate_ternary_expr_value(expr ast.TernaryExpr) Value {
+	condition := g.generate_value(expr.Condition)
+	end_label := g.new_label()
+	e2_label := g.new_label()
+	result := &Variable{Name: g.new_name()}
+
+	g.push(&JumpIfZero{Condition: condition, Target: e2_label})
+	v1 := g.generate_value(expr.Then)
+	g.push(&Copy{Src: v1, Dst: result})
+	g.push(&Jump{Target: end_label})
+	g.push(&Label{Name: e2_label})
+	v2 := g.generate_value(expr.Else)
+	g.push(&Copy{Src: v2, Dst: result})
+	g.push(&Label{Name: end_label})
+
+	return result
+}
 func (g *TackyGenerator) generate_unary_expr_value(expr ast.UnaryExpr) Value {
 	op_map := util.MakeOpmap(map[lex.Toktype]UnaryOpType{
 		lex.BCOMP: COMPLEMENT,
