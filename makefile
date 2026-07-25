@@ -3,7 +3,7 @@ BIN_PATH=./bin
 TEST_DIR=./tests
 
 .DEFAULT_GOAL=make
-.PHONY: clean, test
+.PHONY: test
 
 make:
 	@go run ./scripts/main.go build mycc
