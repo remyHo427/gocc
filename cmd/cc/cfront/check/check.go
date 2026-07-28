@@ -21,14 +21,16 @@ func New() Checker {
 func (c *Checker) Check(tree ast.Program) ast.Program {
 	result := []ast.BlockItem{}
 
-	for _, item := range tree.FuncDef.Items {
+	for _, item := range tree.FuncDef.Block.Blocks {
 		result = append(result, *c.resolve_block_item(item))
 	}
 
 	return ast.Program{
 		FuncDef: ast.FunctionDefinition{
-			Name:  tree.FuncDef.Name,
-			Items: result,
+			Name: tree.FuncDef.Name,
+			Block: ast.Block{
+				Blocks: result,
+			},
 		},
 	}
 }

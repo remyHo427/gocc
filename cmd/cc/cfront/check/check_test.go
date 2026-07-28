@@ -57,13 +57,15 @@ func checkProgram(t *testing.T, tt []TestPair) {
 
 			program := ast.Program{
 				FuncDef: ast.FunctionDefinition{
-					Name:  "main",
-					Items: p.ParseBlockItems(),
+					Name: "main",
+					Block: ast.Block{
+						Blocks: p.ParseBlockItems(),
+					},
 				},
 			}
 			program = c.Check(program)
 			items := []string{}
-			for _, item := range program.FuncDef.Items {
+			for _, item := range program.FuncDef.Block.Blocks {
 				items = append(items, item.String())
 			}
 

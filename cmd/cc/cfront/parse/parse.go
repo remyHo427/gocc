@@ -25,14 +25,14 @@ func New(l *lex.Lexer) *Parser {
 
 func (p *Parser) Parse() ast.Program {
 	ast := ast.Program{
-		FuncDef: p.parse_function_definition(),
+		FuncDef: *p.parse_function_definition(),
 	}
 	p.expect(lex.EOF)
 
 	return ast
 }
 
-func (p *Parser) parse_function_definition() ast.FunctionDefinition {
+func (p *Parser) parse_function_definition() *ast.FunctionDefinition {
 	p.exadv(lex.INT)
 
 	p.expect(lex.IDENT)
@@ -43,11 +43,22 @@ func (p *Parser) parse_function_definition() ast.FunctionDefinition {
 	p.exadv(lex.VOID)
 	p.exadv(lex.RPAREN)
 
-	p.exadv(lex.LBRACE)
+	block := p.ParseBlock()
+	if block == nil {
+		return nil
+	}
 
-	return ast.FunctionDefinition{
+	return &ast.FunctionDefinition{
 		Name:  id,
-		Items: p.ParseBlockItems(),
+		Block: *block,
+	}
+}
+func (p *Parser) ParseBlock() *ast.Block {
+	p.exadv(lex.LBRACE)
+	blocks := p.ParseBlockItems()
+
+	return &ast.Block{
+		Blocks: blocks,
 	}
 }
 

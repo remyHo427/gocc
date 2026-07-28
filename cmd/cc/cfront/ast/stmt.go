@@ -40,3 +40,12 @@ func (s *IfStmt) StmtNode() {}
 func (s *IfStmt) String() string {
 	return join("if", s.Condition, s.Then, s.Else)
 }
+
+type CompoundStmt struct {
+	Block Block
+}
+
+func (s *CompoundStmt) StmtNode() {}
+func (s *CompoundStmt) String() string {
+	return s.Block.String()
+}

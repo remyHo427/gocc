@@ -108,8 +108,10 @@ func GenerateTacky(src string) Program {
 
 	program := ast.Program{
 		FuncDef: ast.FunctionDefinition{
-			Name:  "main",
-			Items: []ast.BlockItem{*p.ParseBlockItem()},
+			Name: "main",
+			Block: ast.Block{
+				Blocks: []ast.BlockItem{*p.ParseBlockItem()},
+			},
 		},
 	}
 	program = checker.Check(program)

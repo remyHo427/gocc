@@ -31,7 +31,7 @@ func (g *TackyGenerator) Generate(tree ast.Program) Program {
 func (g *TackyGenerator) generate_function(tree ast.FunctionDefinition) Function {
 	g.clear()
 
-	for _, item := range tree.Items {
+	for _, item := range tree.Block.Blocks {
 		switch item.Type {
 		case ast.DECL:
 			g.generate_declaration(item.Decl)

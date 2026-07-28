@@ -16,11 +16,11 @@ func (n *Program) String() string {
 
 type FunctionDefinition struct {
 	Name  string
-	Items []BlockItem
+	Block Block
 }
 
 func (n *FunctionDefinition) String() string {
-	return join(n.Name, n.Items)
+	return join(n.Name, n.Block)
 }
 
 type BlockItemType int
@@ -47,4 +47,13 @@ func (bi *BlockItem) String() string {
 		util.Exit_with_println("cannot string block item")
 		return ""
 	}
+}
+
+type Block struct {
+	Node
+	Blocks []BlockItem
+}
+
+func (b *Block) String() string {
+	return join("block", b.Blocks)
 }
