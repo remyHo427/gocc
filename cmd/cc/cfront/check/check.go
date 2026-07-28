@@ -6,14 +6,19 @@ import (
 	"fmt"
 )
 
+type Store map[string]Symbol
+type Symbol struct {
+	name             string
+	fromCurrentBlock bool
+}
 type Checker struct {
-	store     map[string]string
+	store     Store
 	make_name func(string) string
 }
 
 func New() Checker {
 	return Checker{
-		store:     map[string]string{},
+		store:     map[string]Symbol{},
 		make_name: make_namer(),
 	}
 }
@@ -74,6 +79,12 @@ func (c *Checker) resolve_stmt(stmt ast.Stmt) ast.Stmt {
 			Then:      c.resolve_stmt(t.Then),
 			Else:      c.resolve_stmt(t.Else),
 		}
+	case *ast.CompoundStmt:
+		// new_store = copy_store(c.store)
+		// return &ast.CompoundStmt{
+		// 	Block: c.resolve_block_item(),
+		// }
+		return nil
 	case *ast.NullStmt:
 		return &ast.NullStmt{}
 	case nil:
@@ -86,15 +97,18 @@ func (c *Checker) resolve_stmt(stmt ast.Stmt) ast.Stmt {
 }
 
 func (c *Checker) resolve_declaration(decl ast.Declaration) *ast.Declaration {
-	_, ok := c.store[decl.Name]
-	if ok {
+	sym, ok := c.store[decl.Name]
+	if ok && sym.fromCurrentBlock {
 		util.Exit_with_printf("variable %s is already declared!\n", decl.Name)
 		return nil
 	}
 
 	result := ast.Declaration{}
 	unique_name := c.make_name(decl.Name)
-	c.store[decl.Name] = unique_name
+	c.store[decl.Name] = Symbol{
+		name:             unique_name,
+		fromCurrentBlock: true,
+	}
 	result.Name = unique_name
 
 	if decl.Init == nil {
@@ -121,12 +135,13 @@ func (c *Checker) resolve_expr(expr ast.Expr) ast.Expr {
 			}
 		}
 	case *ast.VarExpr:
-		if v, ok := c.store[t.Name]; !ok {
+		sym, ok := c.store[t.Name]
+		if !ok {
 			util.Exit_with_printf("Undeclared variable! got %v (%T)\n",
 				t.Name, t.Name)
 			return nil
 		} else {
-			return &ast.VarExpr{Name: v}
+			return &ast.VarExpr{Name: sym.name}
 		}
 	case *ast.BinaryExpr:
 		return &ast.BinaryExpr{
@@ -161,4 +176,17 @@ func make_namer() func(string) string {
 		counter++
 		return name
 	}
+}
+
+func copy_store(store Store) Store {
+	result := Store{}
+
+	for k, v := range store {
+		result[k] = Symbol{
+			fromCurrentBlock: false,
+			name:             v.name,
+		}
+	}
+
+	return result
 }
