@@ -12,22 +12,25 @@ type Symbol struct {
 	fromCurrentBlock bool
 }
 type Checker struct {
-	store     Store
-	make_name func(string) string
+	make_temporary func(string) string
 }
+
+// make_temporary needs to be reset between calls to Check()
+// make a Checker struct and attach methods to it
+var make_temporary = namer()
 
 func New() Checker {
 	return Checker{
-		store:     map[string]Symbol{},
-		make_name: make_namer(),
+		make_temporary: namer(),
 	}
 }
 
 func (c *Checker) Check(tree ast.Program) ast.Program {
 	result := []ast.BlockItem{}
+	store := map[string]Symbol{}
 
 	for _, item := range tree.FuncDef.Block.Blocks {
-		result = append(result, *c.resolve_block_item(item))
+		result = append(result, *c.resolve_block_item(item, store))
 	}
 
 	return ast.Program{
@@ -40,16 +43,16 @@ func (c *Checker) Check(tree ast.Program) ast.Program {
 	}
 }
 
-func (c *Checker) resolve_block_item(item ast.BlockItem) *ast.BlockItem {
+func (c *Checker) resolve_block_item(item ast.BlockItem, s Store) *ast.BlockItem {
 	result := ast.BlockItem{
 		Type: item.Type,
 	}
 
 	switch item.Type {
 	case ast.DECL:
-		result.Decl = c.resolve_decl(item.Decl)
+		result.Decl = c.resolve_decl(item.Decl, s)
 	case ast.STMT:
-		result.Stmt = c.resolve_stmt(item.Stmt)
+		result.Stmt = c.resolve_stmt(item.Stmt, s)
 	default:
 		util.Exit_with_printf("unknown block item type\n")
 		return nil
@@ -58,26 +61,50 @@ func (c *Checker) resolve_block_item(item ast.BlockItem) *ast.BlockItem {
 	return &result
 }
 
-func (c *Checker) resolve_decl(decl ast.Decl) ast.Decl {
+func (c *Checker) resolve_decl(decl ast.Decl, s Store) ast.Decl {
 	switch t := decl.(type) {
 	case *ast.Declaration:
-		return c.resolve_declaration(*t)
+		return c.resolve_declaration(*t, s)
 	default:
 		util.Exit_with_printf("unknown decl %v (%T)\n", t, t)
 		return nil
 	}
 }
-func (c *Checker) resolve_stmt(stmt ast.Stmt) ast.Stmt {
+
+func (c *Checker) resolve_declaration(decl ast.Declaration, s Store) *ast.Declaration {
+	sym, ok := s[decl.Name]
+	if ok && sym.fromCurrentBlock {
+		util.Exit_with_printf("variable %s is already declared!\n", decl.Name)
+		return nil
+	}
+
+	result := ast.Declaration{}
+	unique_name := c.make_temporary(decl.Name)
+	s[decl.Name] = Symbol{
+		name:             unique_name,
+		fromCurrentBlock: true,
+	}
+	result.Name = unique_name
+
+	if decl.Init == nil {
+		return &result
+	}
+	result.Init = c.resolve_expr(decl.Init, s)
+
+	return &result
+}
+
+func (c *Checker) resolve_stmt(stmt ast.Stmt, s Store) ast.Stmt {
 	switch t := stmt.(type) {
 	case *ast.ExprStmt:
-		return &ast.ExprStmt{Expr: c.resolve_expr(t.Expr)}
+		return &ast.ExprStmt{Expr: c.resolve_expr(t.Expr, s)}
 	case *ast.ReturnStmt:
-		return &ast.ReturnStmt{Expr: c.resolve_expr(t.Expr)}
+		return &ast.ReturnStmt{Expr: c.resolve_expr(t.Expr, s)}
 	case *ast.IfStmt:
 		return &ast.IfStmt{
-			Condition: c.resolve_expr(t.Condition),
-			Then:      c.resolve_stmt(t.Then),
-			Else:      c.resolve_stmt(t.Else),
+			Condition: c.resolve_expr(t.Condition, s),
+			Then:      c.resolve_stmt(t.Then, s),
+			Else:      c.resolve_stmt(t.Else, s),
 		}
 	case *ast.CompoundStmt:
 		// new_store = copy_store(c.store)
@@ -96,46 +123,22 @@ func (c *Checker) resolve_stmt(stmt ast.Stmt) ast.Stmt {
 	}
 }
 
-func (c *Checker) resolve_declaration(decl ast.Declaration) *ast.Declaration {
-	sym, ok := c.store[decl.Name]
-	if ok && sym.fromCurrentBlock {
-		util.Exit_with_printf("variable %s is already declared!\n", decl.Name)
-		return nil
-	}
-
-	result := ast.Declaration{}
-	unique_name := c.make_name(decl.Name)
-	c.store[decl.Name] = Symbol{
-		name:             unique_name,
-		fromCurrentBlock: true,
-	}
-	result.Name = unique_name
-
-	if decl.Init == nil {
-		return &result
-	}
-	result.Init = c.resolve_expr(decl.Init)
-
-	return &result
-}
-
-func (c *Checker) resolve_expr(expr ast.Expr) ast.Expr {
+func (c *Checker) resolve_expr(expr ast.Expr, s Store) ast.Expr {
 	switch t := expr.(type) {
 	case *ast.ConstantExpr:
 		return t
 	case *ast.AssignmentExpr:
 		if _, ok := t.Left.(*ast.VarExpr); !ok {
-			util.Exit_with_printf("Invalid lvalue!, got %v (%T)\n",
-				t.Left, t.Left)
+			util.Exit_with_printf("Invalid lvalue!, got %v (%T)\n", t, t)
 			return nil
 		} else {
 			return &ast.AssignmentExpr{
-				Left:  c.resolve_expr(t.Left),
-				Right: c.resolve_expr(t.Right),
+				Left:  c.resolve_expr(t.Left, s),
+				Right: c.resolve_expr(t.Right, s),
 			}
 		}
 	case *ast.VarExpr:
-		sym, ok := c.store[t.Name]
+		sym, ok := s[t.Name]
 		if !ok {
 			util.Exit_with_printf("Undeclared variable! got %v (%T)\n",
 				t.Name, t.Name)
@@ -146,19 +149,19 @@ func (c *Checker) resolve_expr(expr ast.Expr) ast.Expr {
 	case *ast.BinaryExpr:
 		return &ast.BinaryExpr{
 			Operator: t.Operator,
-			Left:     c.resolve_expr(t.Left),
-			Right:    c.resolve_expr(t.Right),
+			Left:     c.resolve_expr(t.Left, s),
+			Right:    c.resolve_expr(t.Right, s),
 		}
 	case *ast.UnaryExpr:
 		return &ast.UnaryExpr{
 			Operator: t.Operator,
-			Expr:     c.resolve_expr(t.Expr),
+			Expr:     c.resolve_expr(t.Expr, s),
 		}
 	case *ast.TernaryExpr:
 		return &ast.TernaryExpr{
-			Condition: c.resolve_expr(t.Condition),
-			Then:      c.resolve_expr(t.Then),
-			Else:      c.resolve_expr(t.Else),
+			Condition: c.resolve_expr(t.Condition, s),
+			Then:      c.resolve_expr(t.Then, s),
+			Else:      c.resolve_expr(t.Else, s),
 		}
 	case nil:
 		// do nothing
@@ -169,7 +172,7 @@ func (c *Checker) resolve_expr(expr ast.Expr) ast.Expr {
 	}
 }
 
-func make_namer() func(string) string {
+func namer() func(string) string {
 	counter := 0
 	return func(var_name string) string {
 		name := fmt.Sprintf("%s.%d", var_name, counter)
@@ -177,11 +180,10 @@ func make_namer() func(string) string {
 		return name
 	}
 }
-
-func copy_store(store Store) Store {
+func copy_store(s Store) Store {
 	result := Store{}
 
-	for k, v := range store {
+	for k, v := range s {
 		result[k] = Symbol{
 			fromCurrentBlock: false,
 			name:             v.name,

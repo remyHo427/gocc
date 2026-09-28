@@ -63,6 +63,7 @@ func checkProgram(t *testing.T, tt []TestPair) {
 					},
 				},
 			}
+
 			program = c.Check(program)
 			items := []string{}
 			for _, item := range program.FuncDef.Block.Blocks {

@@ -146,7 +146,6 @@ func compile(filename string, src string) string {
 	l := lex.New(filename, src)
 	p := parse.New(l)
 	t := tacky.New()
-	c := check.New()
 	g := cg.New()
 
 	ast := p.Parse()
@@ -158,6 +157,7 @@ func compile(filename string, src string) string {
 		return ""
 	}
 
+	c := check.New()
 	ast = c.Check(ast)
 	tacky := t.Generate(ast)
 	asm := amd64.ToAsm(tacky)
