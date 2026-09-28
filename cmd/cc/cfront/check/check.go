@@ -15,10 +15,6 @@ type Checker struct {
 	make_temporary func(string) string
 }
 
-// make_temporary needs to be reset between calls to Check()
-// make a Checker struct and attach methods to it
-var make_temporary = namer()
-
 func New() Checker {
 	return Checker{
 		make_temporary: namer(),
@@ -26,21 +22,26 @@ func New() Checker {
 }
 
 func (c *Checker) Check(tree ast.Program) ast.Program {
-	result := []ast.BlockItem{}
 	store := map[string]Symbol{}
-
-	for _, item := range tree.FuncDef.Block.Blocks {
-		result = append(result, *c.resolve_block_item(item, store))
-	}
 
 	return ast.Program{
 		FuncDef: ast.FunctionDefinition{
 			Name: tree.FuncDef.Name,
 			Block: ast.Block{
-				Blocks: result,
+				Blocks: c.resolve_blocks(tree.FuncDef.Block.Blocks, store),
 			},
 		},
 	}
+}
+
+func (c *Checker) resolve_blocks(blocks []ast.BlockItem, s Store) []ast.BlockItem {
+	result := []ast.BlockItem{}
+
+	for _, item := range blocks {
+		result = append(result, *c.resolve_block_item(item, s))
+	}
+
+	return result
 }
 
 func (c *Checker) resolve_block_item(item ast.BlockItem, s Store) *ast.BlockItem {
@@ -107,11 +108,11 @@ func (c *Checker) resolve_stmt(stmt ast.Stmt, s Store) ast.Stmt {
 			Else:      c.resolve_stmt(t.Else, s),
 		}
 	case *ast.CompoundStmt:
-		// new_store = copy_store(c.store)
-		// return &ast.CompoundStmt{
-		// 	Block: c.resolve_block_item(),
-		// }
-		return nil
+		return &ast.CompoundStmt{
+			Block: ast.Block{
+				Blocks: c.resolve_blocks(t.Block.Blocks, copy_store(s)),
+			},
+		}
 	case *ast.NullStmt:
 		return &ast.NullStmt{}
 	case nil:
