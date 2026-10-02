@@ -30,8 +30,12 @@ func (g *TackyGenerator) Generate(tree ast.Program) Program {
 
 func (g *TackyGenerator) generate_function(tree ast.FunctionDefinition) Function {
 	g.clear()
+	g.generate_block(tree.Block)
+	return Function{Name: tree.Name, Ins: g.ins}
+}
 
-	for _, item := range tree.Block.Blocks {
+func (g *TackyGenerator) generate_block(block ast.Block) {
+	for _, item := range block.Blocks {
 		switch item.Type {
 		case ast.DECL:
 			g.generate_declaration(item.Decl)
@@ -41,8 +45,6 @@ func (g *TackyGenerator) generate_function(tree ast.FunctionDefinition) Function
 			util.Exit_with_printf("unknown block item %v (%T)\n", item, item)
 		}
 	}
-
-	return Function{Name: tree.Name, Ins: g.ins}
 }
 
 func (g *TackyGenerator) generate_declaration(decl ast.Decl) {
@@ -66,6 +68,8 @@ func (g *TackyGenerator) generate_instructions(body ast.Stmt) {
 		g.generate_value(t.Expr)
 	case *ast.IfStmt:
 		g.generate_if_stmt(*t)
+	case *ast.CompoundStmt:
+		g.generate_block(t.Block)
 	case *ast.NullStmt:
 		// do nothing
 	default:
