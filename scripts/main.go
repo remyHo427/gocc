@@ -46,6 +46,7 @@ func build(args []string) {
 		os.Exit(1)
 	}
 
+	execute_command("go", "generate", "./...")
 	execute_command("go", "build", "-o", BIN_PATH+"/"+app_name, srcdir)
 }
 
