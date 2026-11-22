@@ -5,7 +5,7 @@ Currently WIP.
 ## Dependencies
 - Go (1.26.4 tested on linx/amd64)
 - GNU Make (4.4.1)
-- GCC (16.1.1. This is optional, used as reference in automated test script)
+- GCC (16.1.1)
 
 ## Supported Commands
 - `make`: builds a 
