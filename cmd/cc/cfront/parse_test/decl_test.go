@@ -3,31 +3,34 @@ package parsetest
 import (
 	"cc260717/cmd/cc/cfront/lex"
 	"cc260717/cmd/cc/cfront/parse"
+	"cc260717/internal/unittest"
 	"testing"
 )
 
 func TestDecl(t *testing.T) {
-	tt := []TestPair{
-		{"declare int", "int a = 0;", "(declaration a 0)"},
-		{"declare int no init", "int a;", "(declaration a )"},
-		{"declare int expr", "int a = 1 + 1;", "(declaration a (binary ADD 1 1))"},
+	tt := []unittest.NamedTestPair{
+		{
+			Name:   "declare int",
+			Src:    "int a = 0;",
+			Expect: "(declaration a 0)",
+		},
+		{
+			Name:   "declare int no init",
+			Src:    "int a;",
+			Expect: "(declaration a )",
+		},
+		{
+			Name:   "declare int expr",
+			Src:    "int a = 1 + 1;",
+			Expect: "(declaration a (binary ADD 1 1))",
+		},
 	}
-	check_decl(t, tt)
+	MakeTester(t, tt)()
 }
 
-func check_decl(t *testing.T, tt []TestPair) {
-	t.Helper()
-
-	for _, test := range tt {
-		t.Run(test.name, func(t *testing.T) {
-			l := lex.New("", test.src)
-			p := parse.New(l)
-
-			ast := p.ParseDecl()
-			actual := ast.String()
-			if actual != test.expect {
-				t.Errorf("expected \"%s\", got \"%s\"", test.expect, actual)
-			}
-		})
-	}
+func MakeTester(t *testing.T, tt []unittest.NamedTestPair) func() {
+	return unittest.MakePairTester(t, make_ast, tt)
+}
+func make_ast(src string) string {
+	return parse.New(lex.New("", src)).ParseDecl().String()
 }

@@ -1,16 +1,17 @@
 package lex
 
-import "testing"
+import (
+	"cc260717/internal/unittest"
+	"testing"
+)
 
 func TestEmptyString(t *testing.T) {
-	l := New("", "")
-	seq := []Toktype{}
-	tokseq(*l, seq, t)
+	MakeTest(t, *New("", ""), []Toktype{})()
 }
 func TestSpaceOnly(t *testing.T) {
 	l := New("", "\f\n\r\t\v ")
 	seq := []Toktype{}
-	tokseq(*l, seq, t)
+	MakeTest(t, *l, seq)()
 }
 
 func TestKeywords(t *testing.T) {
@@ -25,7 +26,7 @@ func TestKeywords(t *testing.T) {
 		STRUCT, SWITCH, TYPEDEF, UNION, UNSIGNED, VOID, VOLATILE,
 		WHILE,
 	}
-	tokseq(*l, seq, t)
+	MakeTest(t, *l, seq)()
 }
 
 func TestIdentifiers(t *testing.T) {
@@ -33,14 +34,15 @@ func TestIdentifiers(t *testing.T) {
 	seq := []Toktype{
 		IDENT, IDENT, IDENT, IDENT, IDENT,
 	}
-	tokseq(*l, seq, t)
+
+	MakeTest(t, *l, seq)()
 }
 func TestInteger(t *testing.T) {
 	l := New("", `0 1 10 010`)
 	seq := []Toktype{
 		INT_CONST, INT_CONST, INT_CONST, INT_CONST,
 	}
-	tokseq(*l, seq, t)
+	MakeTest(t, *l, seq)()
 }
 
 func TestOperators(t *testing.T) {
@@ -57,25 +59,12 @@ func TestOperators(t *testing.T) {
 		LS_ASSIGN, RS_ASSIGN, BA_ASSIGN, XO_ASSIGN, BO_ASSIGN,
 		COMMA, LBRACE, RBRACE, SCOLON, ELLIP,
 	}
-	tokseq(*l, seq, t)
+	MakeTest(t, *l, seq)()
 }
 
-func tokseq(l Lexer, seq []Toktype, t *testing.T) {
-	t.Helper()
-
-	i := 0
-	for _, ttype := range seq {
-		if tok := l.Lex(); tok.Type != ttype {
-			t.Errorf("expected %s, got %s at seq[%d]",
-				ttype.String(), ttype.String(), i)
-		}
-		i++
-	}
-
-	if i != len(seq) {
-		t.Errorf("input does not match expected amount of tokens")
-	}
-	if l.Lex().Type != EOF {
-		t.Errorf("input not exhausted")
-	}
+func MakeTest(t *testing.T, l Lexer, seq []Toktype) func() {
+	return unittest.MakeTester(t, next(l), seq)
+}
+func next(l Lexer) func() Toktype {
+	return func() Toktype { return l.Lex().Type }
 }

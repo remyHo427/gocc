@@ -2,6 +2,7 @@ package amd64
 
 import (
 	"cc260717/cmd/cc/backends/amd64/asm"
+	"cc260717/internal/unittest"
 	"testing"
 )
 
@@ -117,17 +118,47 @@ func TestToAsmInstructionBinary(t *testing.T) {
 }
 
 func TestMiscInstructions(t *testing.T) {
-	checkToAsm(t, "label", "label lb.0;", "label lb.0")
-	checkToAsm(t, "copy", "copy 1 tmp.0;", "move $1 tmp.0")
-	checkToAsm(t, "jump", "jump lb.0;", "jump lb.0")
-	checkToAsm(t, "jump_if_zero", "jump_if_zero 1 lb.0;",
-		"comparison $0 $1",
-		"jump_cc E lb.0",
-	)
-	checkToAsm(t, "jump_if_not_zero", "jump_if_not_zero 0 lb.0;",
-		"comparison $0 $0",
-		"jump_cc NE lb.0",
-	)
+	tt := []unittest.NamedTestObj{
+		{
+			Name: "label",
+			Src:  "label lb.0;",
+			Expect: []string{
+				"label lb.0",
+			},
+		},
+		{
+			Name: "copy",
+			Src:  "copy 1 tmp.0;",
+			Expect: []string{
+				"move $1 tmp.0",
+			},
+		},
+		{
+			Name: "jump",
+			Src:  "jump lb.0;",
+			Expect: []string{
+				"jump lb.0",
+			},
+		},
+		{
+			Name: "jump_if_zero",
+			Src:  "jump_if_zero 1 lb.0;",
+			Expect: []string{
+				"comparison $0 $1",
+				"jump_cc E lb.0",
+			},
+		},
+		{
+			Name: "jump_if_not_zero",
+			Src:  "jump_if_not_zero 0 lb.0;",
+			Expect: []string{
+				"comparison $0 $0",
+				"jump_cc NE lb.0",
+			},
+		},
+	}
+
+	MakeTester(t, tt)()
 }
 
 func checkToAsm(t *testing.T, name string, src string, expect ...string) {
@@ -152,4 +183,19 @@ func checkToAsm(t *testing.T, name string, src string, expect ...string) {
 			}
 		}
 	})
+}
+
+func MakeTester(t *testing.T, tt []unittest.NamedTestObj) func() {
+	return unittest.MakeObjTester(t, make_asm, tt)
+}
+func make_asm(src string) []string {
+	result := []string{}
+
+	for _, tackyIns := range parseTacky(src) {
+		for _, asmIns := range ToAsmInstructions(tackyIns) {
+			result = append(result, asmIns.String())
+		}
+	}
+
+	return result
 }

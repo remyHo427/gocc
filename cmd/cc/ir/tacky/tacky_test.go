@@ -7,176 +7,171 @@ import (
 	"cc260717/cmd/cc/cfront/check"
 	"cc260717/cmd/cc/cfront/lex"
 	"cc260717/cmd/cc/cfront/parse"
+	"cc260717/internal/unittest"
 )
 
-type TestPair struct {
-	name     string
-	src      string
-	expected []string
-}
-
 func TestReturn(t *testing.T) {
-	tt := []TestPair{
+	tt := []unittest.NamedTestObj{
 		{
-			"return with value",
-			"return 3;",
-			[]string{
+			Name: "return with value",
+			Src:  "return 3;",
+			Expect: []string{
 				"return 3;",
 			},
 		},
 		{
-			"void return",
-			"return;",
-			[]string{
+			Name: "void return",
+			Src:  "return;",
+			Expect: []string{
 				"return ;",
 			},
 		},
 	}
 
-	check_tt(t, tt)
+	MakeTester(t, tt)()
 }
 func TestUnary(t *testing.T) {
-	tt := []TestPair{
+	tt := []unittest.NamedTestObj{
 		{
-			"negate",
-			"-2;",
-			[]string{"unary - 2 tmp.0;"},
+			Name:   "negate",
+			Src:    "-2;",
+			Expect: []string{"unary - 2 tmp.0;"},
 		},
 		{
-			"complement",
-			"~2;",
-			[]string{"unary ~ 2 tmp.0;"},
+			Name:   "complement",
+			Src:    "~2;",
+			Expect: []string{"unary ~ 2 tmp.0;"},
 		},
 		{
-			"logical NOT",
-			"!2;",
-			[]string{"unary ! 2 tmp.0;"},
+			Name:   "logical NOT",
+			Src:    "!2;",
+			Expect: []string{"unary ! 2 tmp.0;"},
 		},
 		{
-			"nested",
-			"-(-2)",
-			[]string{
+			Name: "nested",
+			Src:  "-(-2);",
+			Expect: []string{
 				"unary - 2 tmp.0;",
 				"unary - tmp.0 tmp.1;",
 			},
 		},
 	}
 
-	check_tt(t, tt)
+	MakeTester(t, tt)()
 }
 func TestDecl(t *testing.T) {
-	tt := []TestPair{
+	tt := []unittest.NamedTestObj{
 		{
-			"declaration",
-			"int a;",
-			[]string{},
+			Name:   "declaration",
+			Src:    "int a;",
+			Expect: []string{},
 		},
 		{
-			"declaration with init",
-			"int a = 0;",
-			[]string{"copy 0 a.0;"},
+			Name:   "declaration with init",
+			Src:    "int a = 0;",
+			Expect: []string{"copy 0 a.0;"},
 		},
 	}
 
-	check_tt(t, tt)
+	MakeTester(t, tt)()
 }
 
 func TestBinary(t *testing.T) {
-	tt := []TestPair{
+	tt := []unittest.NamedTestObj{
 		{
-			"plus",
-			"1 + 2;",
-			[]string{"binary + 1 2 tmp.0;"},
+			Name:   "plus",
+			Src:    "1 + 2;",
+			Expect: []string{"binary + 1 2 tmp.0;"},
 		},
 		{
-			"sub",
-			"1 - 2;",
-			[]string{"binary - 1 2 tmp.0;"},
+			Name:   "sub",
+			Src:    "1 - 2;",
+			Expect: []string{"binary - 1 2 tmp.0;"},
 		},
 		{
-			"mul",
-			"1 * 2;",
-			[]string{"binary * 1 2 tmp.0;"},
+			Name:   "mul",
+			Src:    "1 * 2;",
+			Expect: []string{"binary * 1 2 tmp.0;"},
 		},
 		{
-			"div",
-			"1 / 2;",
-			[]string{"binary / 1 2 tmp.0;"},
+			Name:   "div",
+			Src:    "1 / 2;",
+			Expect: []string{"binary / 1 2 tmp.0;"},
 		},
 		{
-			"remainder",
-			"1 % 2;",
-			[]string{"binary % 1 2 tmp.0;"},
+			Name:   "remainder",
+			Src:    "1 % 2;",
+			Expect: []string{"binary % 1 2 tmp.0;"},
 		},
 		{
-			"bitwise AND",
-			"1 & 2;",
-			[]string{"binary & 1 2 tmp.0;"},
+			Name:   "bitwise AND",
+			Src:    "1 & 2;",
+			Expect: []string{"binary & 1 2 tmp.0;"},
 		},
 		{
-			"bitwise OR",
-			"1 | 2;",
-			[]string{"binary | 1 2 tmp.0;"},
+			Name:   "bitwise OR",
+			Src:    "1 | 2;",
+			Expect: []string{"binary | 1 2 tmp.0;"},
 		},
 		{
-			"left shift",
-			"1 << 2;",
-			[]string{"binary << 1 2 tmp.0;"},
+			Name:   "left shift",
+			Src:    "1 << 2;",
+			Expect: []string{"binary << 1 2 tmp.0;"},
 		},
 		{
-			"right shift",
-			"1 >> 2;",
-			[]string{"binary >> 1 2 tmp.0;"},
+			Name:   "right shift",
+			Src:    "1 >> 2;",
+			Expect: []string{"binary >> 1 2 tmp.0;"},
 		},
 		{
-			"equal",
-			"1 == 2;",
-			[]string{"binary == 1 2 tmp.0;"},
+			Name:   "equal",
+			Src:    "1 == 2;",
+			Expect: []string{"binary == 1 2 tmp.0;"},
 		},
 		{
-			"not equal",
-			"1 != 2;",
-			[]string{"binary != 1 2 tmp.0;"},
+			Name:   "not equal",
+			Src:    "1 != 2;",
+			Expect: []string{"binary != 1 2 tmp.0;"},
 		},
 		{
-			"less than",
-			"1 < 2;",
-			[]string{"binary < 1 2 tmp.0;"},
+			Name:   "less than",
+			Src:    "1 < 2;",
+			Expect: []string{"binary < 1 2 tmp.0;"},
 		},
 		{
-			"greater than",
-			"1 > 2;",
-			[]string{"binary > 1 2 tmp.0;"},
+			Name:   "greater than",
+			Src:    "1 > 2;",
+			Expect: []string{"binary > 1 2 tmp.0;"},
 		},
 		{
-			"less than or equal",
-			"1 <= 2;",
-			[]string{"binary <= 1 2 tmp.0;"},
+			Name:   "less than or equal",
+			Src:    "1 <= 2;",
+			Expect: []string{"binary <= 1 2 tmp.0;"},
 		},
 		{
-			"greater than or equal",
-			"1 >= 2;",
-			[]string{"binary >= 1 2 tmp.0;"},
+			Name:   "greater than or equal",
+			Src:    "1 >= 2;",
+			Expect: []string{"binary >= 1 2 tmp.0;"},
 		},
 		{
-			"nested",
-			"1 + 2 + 3",
-			[]string{
+			Name: "nested",
+			Src:  "1 + 2 + 3;",
+			Expect: []string{
 				"binary + 1 2 tmp.0;",
 				"binary + tmp.0 3 tmp.1;",
 			},
 		},
 	}
 
-	check_tt(t, tt)
+	MakeTester(t, tt)()
 }
 
 func TestLogicalBinary(t *testing.T) {
-	tt := []TestPair{
+	tt := []unittest.NamedTestObj{
 		{
-			"logical and",
-			"1 && 0;",
-			[]string{
+			Name: "logical and",
+			Src:  "1 && 0;",
+			Expect: []string{
 				"jump_if_zero 1 lb.0;",
 				"jump_if_zero 0 lb.0;",
 				"copy 1 tmp.0;",
@@ -187,9 +182,9 @@ func TestLogicalBinary(t *testing.T) {
 			},
 		},
 		{
-			"logical or",
-			"1 || 0",
-			[]string{
+			Name: "logical or",
+			Src:  "1 || 0;",
+			Expect: []string{
 				"jump_if_not_zero 1 lb.0;",
 				"jump_if_not_zero 0 lb.0;",
 				"copy 0 tmp.0;",
@@ -201,40 +196,18 @@ func TestLogicalBinary(t *testing.T) {
 		},
 	}
 
-	check_tt(t, tt)
+	MakeTester(t, tt)()
 }
 
-func check_tt(t *testing.T, pairs []TestPair) {
-	for _, pair := range pairs {
-		t.Run(pair.name, func(t *testing.T) {
-			t.Helper()
-
-			tacky := GenerateTacky(pair.src)
-			if len(pair.expected) == 0 && len(tacky.FuncDef.Ins) == 0 {
-				// expected the tacky output to be empty
-				return
-			}
-
-			if len(tacky.FuncDef.Ins) == 0 {
-				t.Errorf("no tacky instructions emitted")
-			} else if len(tacky.FuncDef.Ins) != len(pair.expected) {
-				t.Errorf("actual instructions count does not match expected")
-			}
-
-			for i, expect := range pair.expected {
-				if actual := tacky.FuncDef.Ins[i].String(); actual != expect {
-					t.Errorf("expect \"%s\" got \"%s\"", expect, actual)
-				}
-			}
-		})
-	}
+func MakeTester(t *testing.T, tt []unittest.NamedTestObj) func() {
+	return unittest.MakeObjTester(t, make_tacky, tt)
 }
-
-func GenerateTacky(src string) Program {
+func make_tacky(src string) []string {
 	generator := New()
 	p := parse.New(lex.New("", src))
 	checker := check.New()
 
+	//
 	program := ast.Program{
 		FuncDef: ast.FunctionDefinition{
 			Name: "main",
@@ -245,5 +218,11 @@ func GenerateTacky(src string) Program {
 	}
 	program = checker.Check(program)
 
-	return generator.Generate(program)
+	//
+	result := []string{}
+	for _, ins := range generator.Generate(program).FuncDef.Ins {
+		result = append(result, ins.String())
+	}
+
+	return result
 }
