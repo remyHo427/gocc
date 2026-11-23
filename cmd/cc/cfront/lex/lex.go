@@ -1,35 +1,30 @@
 package lex
 
 import (
+	"cc260717/internal/lexer"
 	"fmt"
 	"strconv"
 	"unicode"
 )
 
 type Lexer struct {
-	sp  int
-	len int
-
 	file string
 	col  int
 	line int
-
-	src []rune
+	lexer.BaseLexer
 }
 
 func New(filename string, src string) *Lexer {
 	return &Lexer{
-		sp:   0,
-		file: filename,
-		col:  0,
-		line: 1,
-		len:  len(src),
-		src:  []rune(src),
+		file:      filename,
+		col:       0,
+		line:      1,
+		BaseLexer: lexer.New(src),
 	}
 }
 func (l *Lexer) Lex() Token {
-	for !l.isend() {
-		c := l.peek()
+	for !l.IsEnd() {
+		c := l.Peek()
 
 		if unicode.IsSpace(c) {
 			if c == '\n' {
@@ -143,20 +138,20 @@ func (l *Lexer) Lex() Token {
 }
 
 func (l *Lexer) word() Token {
-	start := l.sp
+	start := l.Sp
 	for {
 		l.adv()
-		if l.isend() {
+		if l.IsEnd() {
 			break
-		} else if c := l.peek(); !unicode.IsLetter(c) &&
+		} else if c := l.Peek(); !unicode.IsLetter(c) &&
 			!unicode.IsDigit(c) &&
 			c != '_' {
 			break
 		}
 	}
-	end := l.sp
+	end := l.Sp
 
-	s := string(l.src[start:end])
+	s := string(l.Src[start:end])
 	if kwtok, ok := kw_map[s]; ok {
 		return kwtok
 	}
@@ -167,18 +162,18 @@ func (l *Lexer) word() Token {
 	}
 }
 func (l *Lexer) num() Token {
-	start := l.sp
+	start := l.Sp
 	for {
 		l.adv()
-		if l.isend() {
+		if l.IsEnd() {
 			break
-		} else if !unicode.IsDigit(l.peek()) {
+		} else if !unicode.IsDigit(l.Peek()) {
 			break
 		}
 	}
-	end := l.sp
+	end := l.Sp
 
-	s := string(l.src[start:end])
+	s := string(l.Src[start:end])
 	n, err := strconv.ParseInt(s, 10, 64)
 	if err != nil {
 		return Token{
@@ -199,10 +194,10 @@ func (l *Lexer) match(s string, ttype Toktype, curr *Toktype) {
 		return
 	}
 
-	start := l.sp
+	start := l.Sp
 	for _, c := range s {
-		if l.isend() || l.peek() != rune(c) {
-			l.sp = start
+		if l.IsEnd() || l.Peek() != rune(c) {
+			l.Sp = start
 			return
 		} else {
 			l.adv()
@@ -211,15 +206,9 @@ func (l *Lexer) match(s string, ttype Toktype, curr *Toktype) {
 
 	*curr = ttype
 }
-func (l Lexer) peek() rune {
-	return l.src[l.sp]
-}
 func (l *Lexer) adv() {
 	l.col++
-	l.sp++
-}
-func (l *Lexer) isend() bool {
-	return l.sp >= l.len
+	l.Sp++
 }
 func tok(ttype Toktype) Token {
 	return Token{Type: ttype}

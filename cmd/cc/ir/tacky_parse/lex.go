@@ -4,42 +4,42 @@ import (
 	"unicode"
 
 	"cc260717/cmd/cc/util"
+	"cc260717/internal/lexer"
 )
 
 type Lexer struct {
-	src []rune
-	sp  int
+	lexer.BaseLexer
 }
 
 func New(src string) *Lexer {
 	return &Lexer{
-		src: []rune(src),
+		BaseLexer: lexer.New(src),
 	}
 }
 
 func (l *Lexer) Lex() Token {
-	for !l.isend() {
-		c := l.peek()
+	for !l.IsEnd() {
+		c := l.Peek()
 
 		if unicode.IsSpace(c) {
-			l.adv()
+			l.Adv()
 			continue
 		}
 		if unicode.IsLetter(c) || c == '_' {
-			start := l.sp
+			start := l.Sp
 			for {
-				l.adv()
-				if l.isend() {
+				l.Adv()
+				if l.IsEnd() {
 					break
-				} else if c := l.peek(); !unicode.IsLetter(c) &&
+				} else if c := l.Peek(); !unicode.IsLetter(c) &&
 					!unicode.IsDigit(c) &&
 					c != '.' && c != '_' {
 					break
 				}
 			}
-			end := l.sp
+			end := l.Sp
 
-			s := string(l.src[start:end])
+			s := string(l.Src[start:end])
 			if kwtok, ok := kw_map[s]; ok {
 				return kwtok
 			}
@@ -50,77 +50,77 @@ func (l *Lexer) Lex() Token {
 			}
 		}
 		if unicode.IsDigit(c) {
-			start := l.sp
+			start := l.Sp
 			for {
-				l.adv()
-				if l.isend() {
+				l.Adv()
+				if l.IsEnd() {
 					break
-				} else if !unicode.IsDigit(l.peek()) {
+				} else if !unicode.IsDigit(l.Peek()) {
 					break
 				}
 			}
-			end := l.sp
+			end := l.Sp
 
 			return Token{
 				Type:    INTEGER,
-				Literal: string(l.src[start:end]),
+				Literal: string(l.Src[start:end]),
 			}
 		}
 
 		var ttype Toktype
 		switch c {
 		case '-':
-			l.adv()
+			l.Adv()
 			return tok(SUB)
 		case '~':
-			l.adv()
+			l.Adv()
 			return tok(TILDE)
 		case '+':
-			l.adv()
+			l.Adv()
 			return tok(ADD)
 		case '*':
-			l.adv()
+			l.Adv()
 			return tok(MUL)
 		case '/':
-			l.adv()
+			l.Adv()
 			return tok(DIV)
 		case '%':
-			l.adv()
+			l.Adv()
 			return tok(MOD)
 		case '^':
-			l.adv()
+			l.Adv()
 			return tok(BXOR)
 		case ';':
-			l.adv()
+			l.Adv()
 			return tok(SCOLON)
 		case '!':
-			l.adv()
+			l.Adv()
 			l.match("=", NEQ, &ttype)
 			l.match("", NOT, &ttype)
 			return tok(ttype)
 		case '|':
-			l.adv()
+			l.Adv()
 			l.match("|", OR, &ttype)
 			l.match("", BOR, &ttype)
 			return tok(ttype)
 		case '&':
-			l.adv()
+			l.Adv()
 			l.match("&", AND, &ttype)
 			l.match("", BAND, &ttype)
 			return tok(ttype)
 		case '=':
-			l.adv()
+			l.Adv()
 			l.match("=", EQ, &ttype)
 			l.match("", ASSIGN, &ttype)
 			return tok(ttype)
 		case '<':
-			l.adv()
+			l.Adv()
 			l.match("<", LSHIFT, &ttype)
 			l.match("=", LEQ, &ttype)
 			l.match("", LT, &ttype)
 			return tok(ttype)
 		case '>':
-			l.adv()
+			l.Adv()
 			l.match(">", RSHIFT, &ttype)
 			l.match("=", GEQ, &ttype)
 			l.match("", GT, &ttype)
@@ -138,26 +138,17 @@ func (l *Lexer) match(s string, ttype Toktype, curr *Toktype) {
 		return
 	}
 
-	start := l.sp
+	start := l.Sp
 	for _, c := range s {
-		if l.isend() || l.peek() != rune(c) {
-			l.sp = start
+		if l.IsEnd() || l.Peek() != rune(c) {
+			l.Sp = start
 			return
 		} else {
-			l.adv()
+			l.Adv()
 		}
 	}
 
 	*curr = ttype
-}
-func (l *Lexer) peek() rune {
-	return l.src[l.sp]
-}
-func (l *Lexer) adv() {
-	l.sp++
-}
-func (l *Lexer) isend() bool {
-	return l.sp >= len(l.src)
 }
 func tok(ttype Toktype) Token {
 	return Token{Type: ttype}
