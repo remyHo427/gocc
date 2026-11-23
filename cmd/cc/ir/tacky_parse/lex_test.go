@@ -1,16 +1,20 @@
 package tackyparse
 
-import "testing"
+import (
+	"testing"
+
+	"cc260717/internal/unittest"
+)
 
 func TestIdent(t *testing.T) {
 	l := New(`a b tmp.0`)
 	seq := []Toktype{IDENT, IDENT, IDENT}
-	tokseq(*l, seq, t)
+	tokseq(t, *l, seq)
 }
 func TestValues(t *testing.T) {
 	l := New(`0 10 100`)
 	seq := []Toktype{INTEGER, INTEGER, INTEGER}
-	tokseq(*l, seq, t)
+	tokseq(t, *l, seq)
 }
 func TestOperators(t *testing.T) {
 	l := New(`
@@ -22,7 +26,7 @@ func TestOperators(t *testing.T) {
 		SCOLON, NOT, NEQ, OR, BOR, AND, BAND, EQ,
 		ASSIGN, LSHIFT, LEQ, LT, RSHIFT, GEQ, GT,
 	}
-	tokseq(*l, seq, t)
+	tokseq(t, *l, seq)
 }
 func TestKeywords(t *testing.T) {
 	l := New(`
@@ -34,25 +38,12 @@ func TestKeywords(t *testing.T) {
 		JUMP_IF_ZERO, JUMP_IF_NOT_ZERO,
 		LABEL,
 	}
-	tokseq(*l, seq, t)
+	tokseq(t, *l, seq)
 }
 
-func tokseq(l Lexer, seq []Toktype, t *testing.T) {
-	t.Helper()
-
-	i := 0
-	for _, ttype := range seq {
-		if tok := l.Lex(); tok.Type != ttype {
-			t.Errorf("expected %d, got %d at seq[%d]",
-				ttype, tok.Type, i)
-		}
-		i++
-	}
-
-	if i != len(seq) {
-		t.Errorf("input does not match expected amount of tokens")
-	}
-	if l.Lex().Type != EOF {
-		t.Errorf("input not exhausted")
-	}
+func tokseq(t *testing.T, l Lexer, seq []Toktype) {
+	unittest.Test(t, next(l), seq)
+}
+func next(l Lexer) func() Toktype {
+	return func() Toktype { return l.Lex().Type }
 }

@@ -158,7 +158,7 @@ func TestMiscInstructions(t *testing.T) {
 		},
 	}
 
-	MakeTester(t, tt)()
+	check(t, tt)
 }
 
 func checkToAsm(t *testing.T, name string, src string, expect ...string) {
@@ -185,8 +185,8 @@ func checkToAsm(t *testing.T, name string, src string, expect ...string) {
 	})
 }
 
-func MakeTester(t *testing.T, tt []unittest.NamedTestObj) func() {
-	return unittest.MakeObjTester(t, make_asm, tt)
+func check(t *testing.T, tt []unittest.NamedTestObj) {
+	unittest.TestObj(t, make_asm, tt)
 }
 func make_asm(src string) []string {
 	result := []string{}

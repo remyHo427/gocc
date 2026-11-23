@@ -25,11 +25,12 @@ func TestDecl(t *testing.T) {
 			Expect: "(declaration a (binary ADD 1 1))",
 		},
 	}
-	MakeTester(t, tt)()
+
+	check(t, tt)
 }
 
-func MakeTester(t *testing.T, tt []unittest.NamedTestPair) func() {
-	return unittest.MakePairTester(t, make_ast, tt)
+func check(t *testing.T, tt []unittest.NamedTestPair) {
+	unittest.TestPair(t, make_ast, tt)
 }
 func make_ast(src string) string {
 	return parse.New(lex.New("", src)).ParseDecl().String()

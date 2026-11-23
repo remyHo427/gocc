@@ -28,7 +28,7 @@ func TestReturn(t *testing.T) {
 		},
 	}
 
-	MakeTester(t, tt)()
+	Check(t, tt)
 }
 func TestUnary(t *testing.T) {
 	tt := []unittest.NamedTestObj{
@@ -57,7 +57,7 @@ func TestUnary(t *testing.T) {
 		},
 	}
 
-	MakeTester(t, tt)()
+	Check(t, tt)
 }
 func TestDecl(t *testing.T) {
 	tt := []unittest.NamedTestObj{
@@ -73,7 +73,7 @@ func TestDecl(t *testing.T) {
 		},
 	}
 
-	MakeTester(t, tt)()
+	Check(t, tt)
 }
 
 func TestBinary(t *testing.T) {
@@ -163,7 +163,7 @@ func TestBinary(t *testing.T) {
 		},
 	}
 
-	MakeTester(t, tt)()
+	Check(t, tt)
 }
 
 func TestLogicalBinary(t *testing.T) {
@@ -196,11 +196,11 @@ func TestLogicalBinary(t *testing.T) {
 		},
 	}
 
-	MakeTester(t, tt)()
+	Check(t, tt)
 }
 
-func MakeTester(t *testing.T, tt []unittest.NamedTestObj) func() {
-	return unittest.MakeObjTester(t, make_tacky, tt)
+func Check(t *testing.T, tt []unittest.NamedTestObj) {
+	unittest.TestObj(t, make_tacky, tt)
 }
 func make_tacky(src string) []string {
 	generator := New()

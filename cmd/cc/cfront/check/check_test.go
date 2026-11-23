@@ -1,79 +1,71 @@
 package check
 
 import (
+	"strings"
+	"testing"
+
 	"cc260717/cmd/cc/cfront/ast"
 	"cc260717/cmd/cc/cfront/lex"
 	"cc260717/cmd/cc/cfront/parse"
-	"strings"
-	"testing"
+	"cc260717/internal/unittest"
 )
 
-type TestPair struct {
-	name   string
-	src    string
-	expect string
-}
-
 func TestDeclaration(t *testing.T) {
-	tt := []TestPair{
+	tt := []unittest.NamedTestPair{
 		{
-			"declaration with no init",
-			"int a;}", // the trailing } is required
-			"(declaration a.0 )",
+			Name:   "declaration with no init",
+			Src:    "int a;}", // the trailing } is required
+			Expect: "(declaration a.0 )",
 		},
 		{
-			"declaration with integer init",
-			"int a = 0;}",
-			"(declaration a.0 0)",
+			Name:   "declaration with integer init",
+			Src:    "int a = 0;}",
+			Expect: "(declaration a.0 0)",
 		},
 		{
-			"declaration with expr init",
-			"int a = 1 + 2;}",
-			"(declaration a.0 (binary ADD 1 2))",
+			Name:   "declaration with expr init",
+			Src:    "int a = 1 + 2;}",
+			Expect: "(declaration a.0 (binary ADD 1 2))",
 		},
 		{
-			"declaration with later init",
-			"int a; a = 0;}",
-			"(declaration a.0 ) (assign a.0 0)",
+			Name:   "declaration with later init",
+			Src:    "int a; a = 0;}",
+			Expect: "(declaration a.0 ) (assign a.0 0)",
 		},
 		{
-			"multiple declarations",
-			"int a; int b;}",
-			"(declaration a.0 ) (declaration b.1 )",
+			Name:   "multiple declarations",
+			Src:    "int a; int b;}",
+			Expect: "(declaration a.0 ) (declaration b.1 )",
 		},
 	}
 
-	checkProgram(t, tt)
+	check(t, tt)
 }
 
-func checkProgram(t *testing.T, tt []TestPair) {
-	t.Helper()
+func check(t *testing.T, tt []unittest.NamedTestPair) {
+	unittest.TestPair(t, make_program, tt)
+}
+func make_program(src string) string {
+	l := lex.New("", src)
+	p := parse.New(l)
+	c := New()
 
-	for _, test := range tt {
-		t.Run(test.name, func(t *testing.T) {
-			l := lex.New("", test.src)
-			p := parse.New(l)
-			c := New()
-
-			program := ast.Program{
-				FuncDef: ast.FunctionDefinition{
-					Name: "main",
-					Block: ast.Block{
-						Blocks: p.ParseBlockItems(),
-					},
-				},
-			}
-
-			program = c.Check(program)
-			items := []string{}
-			for _, item := range program.FuncDef.Block.Blocks {
-				items = append(items, item.String())
-			}
-
-			actual := strings.Join(items, " ")
-			if actual != test.expect {
-				t.Errorf("expected \"%s\", got \"%s\"", test.expect, actual)
-			}
-		})
+	//
+	program := ast.Program{
+		FuncDef: ast.FunctionDefinition{
+			Name: "main",
+			Block: ast.Block{
+				Blocks: p.ParseBlockItems(),
+			},
+		},
 	}
+	program = c.Check(program)
+
+	//
+	items := []string{}
+	for _, item := range program.FuncDef.Block.Blocks {
+		items = append(items, item.String())
+	}
+
+	return strings.Join(items, " ")
 }

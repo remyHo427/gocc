@@ -6,12 +6,12 @@ import (
 )
 
 func TestEmptyString(t *testing.T) {
-	MakeTest(t, *New("", ""), []Toktype{})()
+	check(t, *New("", ""), []Toktype{})
 }
 func TestSpaceOnly(t *testing.T) {
 	l := New("", "\f\n\r\t\v ")
 	seq := []Toktype{}
-	MakeTest(t, *l, seq)()
+	check(t, *l, seq)
 }
 
 func TestKeywords(t *testing.T) {
@@ -26,7 +26,7 @@ func TestKeywords(t *testing.T) {
 		STRUCT, SWITCH, TYPEDEF, UNION, UNSIGNED, VOID, VOLATILE,
 		WHILE,
 	}
-	MakeTest(t, *l, seq)()
+	check(t, *l, seq)
 }
 
 func TestIdentifiers(t *testing.T) {
@@ -35,14 +35,14 @@ func TestIdentifiers(t *testing.T) {
 		IDENT, IDENT, IDENT, IDENT, IDENT,
 	}
 
-	MakeTest(t, *l, seq)()
+	check(t, *l, seq)
 }
 func TestInteger(t *testing.T) {
 	l := New("", `0 1 10 010`)
 	seq := []Toktype{
 		INT_CONST, INT_CONST, INT_CONST, INT_CONST,
 	}
-	MakeTest(t, *l, seq)()
+	check(t, *l, seq)
 }
 
 func TestOperators(t *testing.T) {
@@ -59,11 +59,11 @@ func TestOperators(t *testing.T) {
 		LS_ASSIGN, RS_ASSIGN, BA_ASSIGN, XO_ASSIGN, BO_ASSIGN,
 		COMMA, LBRACE, RBRACE, SCOLON, ELLIP,
 	}
-	MakeTest(t, *l, seq)()
+	check(t, *l, seq)
 }
 
-func MakeTest(t *testing.T, l Lexer, seq []Toktype) func() {
-	return unittest.MakeTester(t, next(l), seq)
+func check(t *testing.T, l Lexer, seq []Toktype) {
+	unittest.Test(t, next(l), seq)
 }
 func next(l Lexer) func() Toktype {
 	return func() Toktype { return l.Lex().Type }
