@@ -1,11 +1,12 @@
 package amd64
 
 import (
+	"testing"
+
 	"cc260717/cmd/cc/backends/amd64/asm"
 	"cc260717/cmd/cc/backends/amd64/fix"
 	"cc260717/cmd/cc/backends/amd64/preg"
 	"cc260717/cmd/cc/backends/amd64/stack"
-	"testing"
 )
 
 func TestReturn(t *testing.T) {

@@ -1,10 +1,11 @@
 package parse
 
 import (
+	"fmt"
+
 	"cc260717/cmd/cc/cfront/ast"
 	"cc260717/cmd/cc/cfront/lex"
 	"cc260717/cmd/cc/util"
-	"fmt"
 )
 
 type Parser struct {

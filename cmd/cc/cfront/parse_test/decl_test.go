@@ -1,10 +1,11 @@
 package parsetest
 
 import (
+	"testing"
+
 	"cc260717/cmd/cc/cfront/lex"
 	"cc260717/cmd/cc/cfront/parse"
 	"cc260717/internal/unittest"
-	"testing"
 )
 
 func TestDecl(t *testing.T) {
@@ -26,10 +27,10 @@ func TestDecl(t *testing.T) {
 		},
 	}
 
-	check(t, tt)
+	check_decl(t, tt)
 }
 
-func check(t *testing.T, tt []unittest.NamedTestPair) {
+func check_decl(t *testing.T, tt []unittest.NamedTestPair) {
 	unittest.TestPair(t, make_ast, tt)
 }
 func make_ast(src string) string {

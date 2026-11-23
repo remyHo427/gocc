@@ -1,8 +1,9 @@
 package ast
 
 import (
-	"cc260717/cmd/cc/cfront/lex"
 	"fmt"
+
+	"cc260717/cmd/cc/cfront/lex"
 )
 
 type Expr interface {

@@ -1,9 +1,10 @@
 package check
 
 import (
+	"fmt"
+
 	"cc260717/cmd/cc/cfront/ast"
 	"cc260717/cmd/cc/util"
-	"fmt"
 )
 
 type Store map[string]Symbol

@@ -1,9 +1,10 @@
 package amd64
 
 import (
+	"testing"
+
 	"cc260717/cmd/cc/backends/amd64/asm"
 	"cc260717/internal/unittest"
-	"testing"
 )
 
 func TestToAsmInstructionReturn(t *testing.T) {
