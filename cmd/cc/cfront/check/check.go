@@ -29,7 +29,7 @@ func (c *Checker) Check(tree ast.Program) ast.Program {
 		FuncDef: ast.FunctionDefinition{
 			Name: tree.FuncDef.Name,
 			Block: ast.Block{
-				Blocks: c.resolve_blocks(tree.FuncDef.Block.Blocks, store),
+				BlockItems: c.resolve_blocks(tree.FuncDef.Block.BlockItems, store),
 			},
 		},
 	}
@@ -111,7 +111,7 @@ func (c *Checker) resolve_stmt(stmt ast.Stmt, s Store) ast.Stmt {
 	case *ast.CompoundStmt:
 		return &ast.CompoundStmt{
 			Block: ast.Block{
-				Blocks: c.resolve_blocks(t.Block.Blocks, copy_store(s)),
+				BlockItems: c.resolve_blocks(t.Block.BlockItems, copy_store(s)),
 			},
 		}
 	case *ast.NullStmt:

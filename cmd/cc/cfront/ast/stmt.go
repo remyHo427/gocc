@@ -47,5 +47,5 @@ type CompoundStmt struct {
 
 func (s *CompoundStmt) StmtNode() {}
 func (s *CompoundStmt) String() string {
-	return s.Block.String()
+	return join("compound", s.Block.String())
 }

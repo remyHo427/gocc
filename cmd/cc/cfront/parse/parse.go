@@ -56,10 +56,11 @@ func (p *Parser) parse_function_definition() *ast.FunctionDefinition {
 }
 func (p *Parser) ParseBlock() *ast.Block {
 	p.exadv(lex.LBRACE)
-	blocks := p.ParseBlockItems()
+	block_items := p.ParseBlockItems()
+	p.exadv(lex.RBRACE)
 
 	return &ast.Block{
-		Blocks: blocks,
+		BlockItems: block_items,
 	}
 }
 

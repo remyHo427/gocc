@@ -59,6 +59,17 @@ func TestIfStmt(t *testing.T) {
 	check_stmt(t, tt)
 }
 
+func TestCompoundStmt(t *testing.T) {
+	tt := []unittest.NamedTestPair{
+		{
+			Name:   "compound stmt",
+			Src:    "{ int a; 1; }",
+			Expect: "(compound (block (declaration a ) 1))",
+		},
+	}
+	check_stmt(t, tt)
+}
+
 func check_stmt(t *testing.T, tt []unittest.NamedTestPair) {
 	unittest.TestPair(t, parse_stmt, tt)
 }

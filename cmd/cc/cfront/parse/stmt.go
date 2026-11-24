@@ -13,6 +13,8 @@ func (p *Parser) ParseStmt() ast.Stmt {
 	case lex.IF:
 		p.adv()
 		return p.parse_if_stmt()
+	case lex.LBRACE:
+		return p.parse_compound_stmt()
 	default:
 		return p.parse_expr_stmt()
 	}
@@ -83,5 +85,15 @@ func (p *Parser) parse_if_stmt() *ast.IfStmt {
 		Condition: cond,
 		Then:      then,
 		Else:      Else,
+	}
+}
+
+func (p *Parser) parse_compound_stmt() *ast.CompoundStmt {
+	if block := p.ParseBlock(); block == nil {
+		return nil
+	} else {
+		return &ast.CompoundStmt{
+			Block: *block,
+		}
 	}
 }

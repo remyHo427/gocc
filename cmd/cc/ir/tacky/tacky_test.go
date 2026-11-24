@@ -212,7 +212,7 @@ func make_tacky(src string) []string {
 		FuncDef: ast.FunctionDefinition{
 			Name: "main",
 			Block: ast.Block{
-				Blocks: []ast.BlockItem{*p.ParseBlockItem()},
+				BlockItems: []ast.BlockItem{*p.ParseBlockItem()},
 			},
 		},
 	}

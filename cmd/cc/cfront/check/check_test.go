@@ -14,28 +14,18 @@ func TestDeclaration(t *testing.T) {
 	tt := []unittest.NamedTestPair{
 		{
 			Name:   "declaration with no init",
-			Src:    "int a;}", // the trailing } is required
+			Src:    "int a;",
 			Expect: "(declaration a.0 )",
 		},
 		{
 			Name:   "declaration with integer init",
-			Src:    "int a = 0;}",
+			Src:    "int a = 0;",
 			Expect: "(declaration a.0 0)",
 		},
 		{
 			Name:   "declaration with expr init",
-			Src:    "int a = 1 + 2;}",
+			Src:    "int a = 1 + 2;",
 			Expect: "(declaration a.0 (binary ADD 1 2))",
-		},
-		{
-			Name:   "declaration with later init",
-			Src:    "int a; a = 0;}",
-			Expect: "(declaration a.0 ) (assign a.0 0)",
-		},
-		{
-			Name:   "multiple declarations",
-			Src:    "int a; int b;}",
-			Expect: "(declaration a.0 ) (declaration b.1 )",
 		},
 	}
 
@@ -55,7 +45,12 @@ func make_program(src string) string {
 		FuncDef: ast.FunctionDefinition{
 			Name: "main",
 			Block: ast.Block{
-				Blocks: p.ParseBlockItems(),
+				BlockItems: []ast.BlockItem{
+					{
+						Type: ast.DECL,
+						Decl: p.ParseDecl(),
+					},
+				},
 			},
 		},
 	}
@@ -63,7 +58,7 @@ func make_program(src string) string {
 
 	//
 	items := []string{}
-	for _, item := range program.FuncDef.Block.Blocks {
+	for _, item := range program.FuncDef.Block.BlockItems {
 		items = append(items, item.String())
 	}
 

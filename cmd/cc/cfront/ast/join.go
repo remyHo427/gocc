@@ -16,12 +16,11 @@ func join(args ...any) string {
 			out.WriteString(t.String())
 		case string:
 			out.WriteString(t)
-		case []any:
-			out.WriteString(join(t))
 		case nil:
 			// do nothing
 		default:
-			util.Exit_with_printf("cannot stringify unknown value %v", t)
+			util.Exit_with_printf("cannot stringify unknown value %v (%T)\n",
+				t, t)
 		}
 
 		if i < len(args)-1 {

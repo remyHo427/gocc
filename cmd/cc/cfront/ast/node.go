@@ -1,6 +1,6 @@
 package ast
 
-import "cc260717/cmd/cc/util"
+import "strings"
 
 type Node interface {
 	String() string
@@ -31,7 +31,6 @@ const (
 )
 
 type BlockItem struct {
-	Node
 	Type BlockItemType
 	Stmt Stmt
 	Decl Decl
@@ -44,16 +43,20 @@ func (bi *BlockItem) String() string {
 	case DECL:
 		return bi.Decl.String()
 	default:
-		util.Exit_with_println("cannot string block item")
 		return ""
 	}
 }
 
 type Block struct {
-	Node
-	Blocks []BlockItem
+	BlockItems []BlockItem
 }
 
 func (b *Block) String() string {
-	return join("block", b.Blocks)
+	items_strs := []string{}
+
+	for _, item := range b.BlockItems {
+		items_strs = append(items_strs, item.String())
+	}
+
+	return join("block", strings.Join(items_strs, " "))
 }
