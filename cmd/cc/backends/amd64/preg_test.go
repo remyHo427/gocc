@@ -114,34 +114,16 @@ func TestPseudoRegistersReplacement(t *testing.T) {
 }
 
 func TestMiscInstructionsPG(t *testing.T) {
-	checkPG(t, "copy", "copy 1 tmp.0;", "move $1 s-4")
-}
-
-func checkPG(t *testing.T, name string, src string, expect ...string) {
-	t.Helper()
-
-	t.Run(name, func(t *testing.T) {
-		pg := preg.New(4)
-		asm := []asm.Instruction{}
-
-		for _, tackyIns := range parseTacky(src) {
-			asm = append(asm, ToAsmInstructions(tackyIns)...)
-		}
-
-		program := pg.Replace(asmProgram(asm))
-
-		if len(program.FuncDef.Ins) != len(expect) {
-			t.Errorf("expect %d instructions, got %d instead",
-				len(program.FuncDef.Ins), len(expect))
-		}
-
-		for i, ins := range program.FuncDef.Ins {
-			if actual := ins.String(); expect[i] != actual {
-				t.Errorf("expect \"%s\", got \"%s\"",
-					expect[i], actual)
-			}
-		}
-	})
+	tt := []unittest.NamedTestObj{
+		{
+			Name: "copy",
+			Src:  "copy 1 tmp.0;",
+			Expect: []string{
+				"move $1 s-4",
+			},
+		},
+	}
+	check_pg(t, tt)
 }
 
 func check_pg(t *testing.T, tt []unittest.NamedTestObj) {
