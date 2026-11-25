@@ -203,11 +203,12 @@ func Check(t *testing.T, tt []unittest.NamedTestObj) {
 	unittest.TestObj(t, make_tacky, tt)
 }
 func make_tacky(src string) []string {
-	generator := New()
-	p := parse.New(lex.New("", src))
+	l := lex.New("", src)
+	toks, _ := l.LexAll()
+
+	p := parse.New(toks)
 	checker := check.New()
 
-	//
 	program := ast.Program{
 		FuncDef: ast.FunctionDefinition{
 			Name: "main",
@@ -219,6 +220,7 @@ func make_tacky(src string) []string {
 	program = checker.Check(program)
 
 	//
+	generator := New()
 	result := []string{}
 	for _, ins := range generator.Generate(program).FuncDef.Ins {
 		result = append(result, ins.String())

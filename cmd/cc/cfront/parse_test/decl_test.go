@@ -34,5 +34,8 @@ func check_decl(t *testing.T, tt []unittest.NamedTestPair) {
 	unittest.TestPair(t, make_ast, tt)
 }
 func make_ast(src string) string {
-	return parse.New(lex.New("", src)).ParseDecl().String()
+	l := lex.New("", src)
+	toks, _ := l.LexAll()
+
+	return parse.New(toks).ParseDecl().String()
 }

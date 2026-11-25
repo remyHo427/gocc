@@ -37,7 +37,8 @@ func check(t *testing.T, tt []unittest.NamedTestPair) {
 }
 func make_program(src string) string {
 	l := lex.New("", src)
-	p := parse.New(l)
+	toks, _ := l.LexAll()
+	p := parse.New(toks)
 	c := New()
 
 	//

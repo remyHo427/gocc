@@ -2,15 +2,18 @@ package lex
 
 import (
 	"cc260717/internal/lexer"
-	"fmt"
 	"strconv"
 	"unicode"
 )
+
+var ERRTOK = Token{Type: ERR}
+var EOFTOK = Token{Type: EOF}
 
 type Lexer struct {
 	file string
 	col  int
 	line int
+	err  []LexerError
 	lexer.BaseLexer
 }
 
@@ -21,6 +24,23 @@ func New(filename string, src string) *Lexer {
 		line:      1,
 		BaseLexer: lexer.New(src),
 	}
+}
+
+func (l *Lexer) LexAll() ([]Token, []LexerError) {
+	toks := []Token{}
+
+	for {
+		if tok := l.Lex(); tok.Type == ERR {
+			continue
+		} else if tok.Type == EOF {
+			break
+		} else {
+			toks = append(toks, tok)
+			continue
+		}
+	}
+
+	return toks, l.err
 }
 func (l *Lexer) Lex() Token {
 	for !l.IsEnd() {
@@ -122,19 +142,13 @@ func (l *Lexer) Lex() Token {
 			l.match("", ASSIGN, &ttype)
 			return tok(ttype)
 		default:
+			l.error(ErrInvalidCharacter)
 			l.adv()
-			return Token{
-				Type:     ERR,
-				Error:    ErrInvalidCharacter,
-				ErrorStr: fmt.Sprintf("'%c'", c),
-				File:     l.file,
-				Col:      l.col,
-				Line:     l.line,
-			}
+			return ERRTOK
 		}
 	}
 
-	return tok(EOF)
+	return EOFTOK
 }
 
 func (l *Lexer) word() Token {
@@ -176,17 +190,20 @@ func (l *Lexer) num() Token {
 	s := string(l.Src[start:end])
 	n, err := strconv.ParseInt(s, 10, 64)
 	if err != nil {
-		return Token{
-			Type:     ERR,
-			Error:    ErrInvalidIntLiteral,
-			ErrorStr: err.Error(),
-			File:     l.file,
-			Col:      l.col,
-			Line:     l.line,
-		}
+		l.error(ErrInvalidIntLiteral)
+		return ERRTOK
 	}
 
 	return Token{Type: INT_CONST, IntVal: n, Literal: s}
+}
+func (l *Lexer) error(e error) {
+	lex_err := LexerError{
+		File:  l.file,
+		Line:  l.line,
+		Col:   l.col,
+		Error: e,
+	}
+	l.err = append(l.err, lex_err)
 }
 
 func (l *Lexer) match(s string, ttype Toktype, curr *Toktype) {

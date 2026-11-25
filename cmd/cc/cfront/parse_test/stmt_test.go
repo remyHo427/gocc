@@ -74,5 +74,8 @@ func check_stmt(t *testing.T, tt []unittest.NamedTestPair) {
 	unittest.TestPair(t, parse_stmt, tt)
 }
 func parse_stmt(src string) string {
-	return parse.New(lex.New("", src)).ParseStmt().String()
+	l := lex.New("", src)
+	toks, _ := l.LexAll()
+
+	return parse.New(toks).ParseStmt().String()
 }

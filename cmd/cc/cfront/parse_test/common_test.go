@@ -12,5 +12,8 @@ func check_expr(t *testing.T, tt []unittest.NamedTestPair) {
 	unittest.TestPair(t, make_expr, tt)
 }
 func make_expr(src string) string {
-	return parse.New(lex.New("", src)).ParseExpr(parse.LOWEST).String()
+	l := lex.New("", src)
+	toks, _ := l.LexAll()
+
+	return parse.New(toks).ParseExpr(parse.LOWEST).String()
 }

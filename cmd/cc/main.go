@@ -144,14 +144,23 @@ func compile_file(flags CmdFlags, file string) {
 
 func compile(filename string, src string) string {
 	l := lex.New(filename, src)
-	p := parse.New(l)
-	t := tacky.New()
-	g := cg.New()
+	toks, err := l.LexAll()
 
+	if len(err) != 0 {
+		for _, e := range err {
+			fmt.Fprintf(os.Stderr, "%s:%d %s\n",
+				e.File, e.Line, e.Error.Error())
+		}
+		os.Exit(1)
+		return ""
+	}
+
+	p := parse.New(toks)
 	ast := p.Parse()
-	if len(p.Errors) != 0 {
-		for _, err := range p.Errors {
-			print_errors(err)
+	if len(p.Err) != 0 {
+		for _, e := range p.Err {
+			fmt.Fprintf(os.Stderr, "%s:%d %s\n",
+				e.File, e.Line, e.Error.Error())
 		}
 		os.Exit(1)
 		return ""
@@ -159,9 +168,12 @@ func compile(filename string, src string) string {
 
 	c := check.New()
 	ast = c.Check(ast)
+
+	t := tacky.New()
 	tacky := t.Generate(ast)
 	asm := amd64.ToAsm(tacky)
 
+	g := cg.New()
 	return g.Generate(asm)
 }
 

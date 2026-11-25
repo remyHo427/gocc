@@ -2,4 +2,4 @@ package parse
 
 import "errors"
 
-var LexErr = errors.New("token error")
+var ErrUnexpectedToken = errors.New("unexpected token")
