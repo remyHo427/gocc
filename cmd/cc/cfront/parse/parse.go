@@ -3,6 +3,9 @@ package parse
 import (
 	"cc260717/cmd/cc/cfront/ast"
 	"cc260717/cmd/cc/cfront/lex"
+	"cc260717/cmd/cc/util"
+	"fmt"
+	"os"
 )
 
 type ParserError struct {
@@ -28,24 +31,46 @@ func New(toks []lex.Token) *Parser {
 }
 
 func (p *Parser) Parse() ast.Program {
-	ast := ast.Program{
-		FuncDef: *p.parse_function_definition(),
-	}
-	p.expect(lex.EOF)
+	var program ast.Program
 
-	return ast
+	func_def := p.parse_function_definition()
+	if func_def == nil {
+		return program
+	}
+	program.FuncDef = *func_def
+
+	if !p.expect(lex.EOF) {
+		util.Exit_with_println("failed to parse program")
+		os.Exit(1)
+	}
+
+	return program
 }
 
 func (p *Parser) parse_function_definition() *ast.FunctionDefinition {
-	p.exadv(lex.INT)
+	if !p.expect(lex.INT) {
+		return nil
+	}
+	p.adv()
 
-	p.expect(lex.IDENT)
+	if !p.expect(lex.IDENT) {
+		return nil
+	}
 	id := p.curr.Literal
 	p.adv()
 
-	p.exadv(lex.LPAREN)
-	p.exadv(lex.VOID)
-	p.exadv(lex.RPAREN)
+	if !p.expect(lex.LPAREN) {
+		return nil
+	}
+	p.adv()
+	if !p.expect(lex.VOID) {
+		return nil
+	}
+	p.adv()
+	if !p.expect(lex.RPAREN) {
+		return nil
+	}
+	p.adv()
 
 	block := p.ParseBlock()
 	if block == nil {
@@ -58,9 +83,16 @@ func (p *Parser) parse_function_definition() *ast.FunctionDefinition {
 	}
 }
 func (p *Parser) ParseBlock() *ast.Block {
-	p.exadv(lex.LBRACE)
+	if !p.expect(lex.LBRACE) {
+		return nil
+	}
+	p.adv()
+
 	block_items := p.ParseBlockItems()
-	p.exadv(lex.RBRACE)
+	if !p.expect(lex.RBRACE) {
+		return nil
+	}
+	p.adv()
 
 	return &ast.Block{
 		BlockItems: block_items,
@@ -72,10 +104,6 @@ func (p *Parser) peek() lex.Toktype {
 }
 func (p *Parser) is(ttype lex.Toktype) bool {
 	return p.curr.Type == ttype
-}
-func (p *Parser) exadv(ttype lex.Toktype) {
-	p.expect(ttype)
-	p.adv()
 }
 func (p *Parser) adv() {
 	p.curr = p.next
@@ -90,22 +118,16 @@ func (p *Parser) pop() lex.Token {
 		return lex.EOFTOK
 	}
 }
-func (p *Parser) expect(ttype lex.Toktype) {
+func (p *Parser) expect(ttype lex.Toktype) bool {
 	if tok := p.curr; tok.Type != ttype {
 		e := ParserError{
-			File:  tok.File,
-			Line:  tok.Line,
-			Error: ErrUnexpectedToken,
+			File: tok.File,
+			Line: tok.Line,
+			Error: fmt.Errorf("%s \"%s\"",
+				ERR_UNEXPECTED_TOKEN, tok.Type.String()),
 		}
 		p.Err = append(p.Err, e)
-		p.panic()
+		return false
 	}
-}
-func (p *Parser) panic() {
-	for {
-		if tok := p.curr; tok.Type == lex.SCOLON || tok.Type == lex.EOF {
-			break
-		}
-		p.adv()
-	}
+	return true
 }

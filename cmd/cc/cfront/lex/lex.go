@@ -171,6 +171,9 @@ func (l *Lexer) word() Token {
 	}
 
 	return Token{
+		File:    l.file,
+		Line:    l.line,
+		Col:     l.col,
 		Type:    IDENT,
 		Literal: s,
 	}
@@ -194,7 +197,14 @@ func (l *Lexer) num() Token {
 		return ERRTOK
 	}
 
-	return Token{Type: INT_CONST, IntVal: n, Literal: s}
+	return Token{
+		File:    l.file,
+		Line:    l.line,
+		Col:     l.col,
+		Type:    INT_CONST,
+		IntVal:  n,
+		Literal: s,
+	}
 }
 func (l *Lexer) error(e error) {
 	lex_err := LexerError{
@@ -229,6 +239,7 @@ func (l *Lexer) adv() {
 }
 func (l *Lexer) tok(ttype Toktype) Token {
 	return Token{
+		Col:  l.col,
 		File: l.file,
 		Line: l.line,
 		Type: ttype,

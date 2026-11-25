@@ -1,6 +1,6 @@
 package parse
 
-import "errors"
-
-var ErrUnexpectedToken = errors.New("unexpected token")
-var ErrUnknownToken = errors.New("unknown token")
+const (
+	ERR_UNEXPECTED_TOKEN = "unexpected token"
+	ERR_UNKNOWN_TOKEN    = "unknown token"
+)

@@ -176,7 +176,3 @@ func compile(filename string, src string) string {
 	g := cg.New()
 	return g.Generate(asm)
 }
-
-func print_errors(err error) {
-	fmt.Fprintf(os.Stderr, "%s", err)
-}

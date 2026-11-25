@@ -4,6 +4,7 @@ import (
 	"cc260717/cmd/cc/cfront/ast"
 	"cc260717/cmd/cc/cfront/lex"
 	"cc260717/cmd/cc/util"
+	"fmt"
 )
 
 type Prec uint
@@ -142,7 +143,10 @@ func (p *Parser) parseTernaryOperator(left ast.Expr) *ast.TernaryExpr {
 	}
 	p.adv()
 
-	p.exadv(lex.COLON)
+	if !p.expect(lex.COLON) {
+		return nil
+	}
+	p.adv()
 
 	if Else := p.ParseExpr(p.prec()); Else == nil {
 		return nil
@@ -171,17 +175,21 @@ func (p *Parser) parsePrefix() ast.Expr {
 			return nil
 		} else {
 			p.adv()
-			p.expect(lex.RPAREN)
+			if !p.expect(lex.RPAREN) {
+				return nil
+			}
 			return inner
 		}
 	default:
 		tok := p.curr
-		err := ParserError{
-			File:  tok.File,
-			Line:  tok.Line,
-			Error: ErrUnknownToken,
+		e := ParserError{
+			File: tok.File,
+			Line: tok.Line,
+			Error: fmt.Errorf("expect primary expression, got %s",
+				tok.Type.String()),
 		}
-		p.Err = append(p.Err, err)
+		p.Err = append(p.Err, e)
+		p.adv()
 		return nil
 	}
 }

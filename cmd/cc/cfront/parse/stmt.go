@@ -6,27 +6,18 @@ import (
 )
 
 func (p *Parser) ParseStmt() ast.Stmt {
-	var stmt ast.Stmt
-
 	switch p.curr.Type {
 	case lex.RETURN:
 		p.adv()
-		stmt = p.parse_return_stmt()
+		return p.parse_return_stmt()
 	case lex.IF:
 		p.adv()
-		stmt = p.parse_if_stmt()
+		return p.parse_if_stmt()
 	case lex.LBRACE:
-		stmt = p.parse_compound_stmt()
+		return p.parse_compound_stmt()
 	default:
-		stmt = p.parse_expr_stmt()
+		return p.parse_expr_stmt()
 	}
-
-	if stmt == nil {
-		p.panic()
-		return nil
-	}
-
-	return stmt
 }
 
 func (p *Parser) parse_return_stmt() *ast.ReturnStmt {
@@ -44,7 +35,11 @@ func (p *Parser) parse_return_stmt() *ast.ReturnStmt {
 	}
 	p.adv()
 
-	p.exadv(lex.SCOLON)
+	if !p.expect(lex.SCOLON) {
+		return nil
+	}
+	p.adv()
+
 	return stmt
 }
 
@@ -64,18 +59,30 @@ func (p *Parser) parse_expr_stmt() ast.Stmt {
 	}
 	p.adv()
 
-	p.exadv(lex.SCOLON)
+	if !p.expect(lex.SCOLON) {
+		return nil
+	}
+	p.adv()
+
 	return stmt
 }
 
 func (p *Parser) parse_if_stmt() *ast.IfStmt {
-	p.exadv(lex.LPAREN)
+	if !p.expect(lex.LPAREN) {
+		return nil
+	}
+	p.adv()
+
 	cond := p.ParseExpr(LOWEST)
 	if cond == nil {
 		return nil
 	}
 	p.adv()
-	p.exadv(lex.RPAREN)
+
+	if !p.expect(lex.RPAREN) {
+		return nil
+	}
+	p.adv()
 
 	then := p.ParseStmt()
 	if then == nil {

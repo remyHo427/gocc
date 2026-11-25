@@ -30,31 +30,34 @@ func (p *Parser) ParseBlockItem() *ast.BlockItem {
 func (p *Parser) ParseBlockItems() []ast.BlockItem {
 	items := []ast.BlockItem{}
 
-	for !p.is(lex.RBRACE) {
-		if item := p.ParseBlockItem(); item != nil {
-			items = append(items, *item)
+	for !p.is(lex.EOF) && !p.is(lex.RBRACE) {
+		if b := p.ParseBlockItem(); b == nil {
+			for !p.is(lex.SCOLON) && !p.is(lex.EOF) {
+				p.adv()
+			}
+			p.adv()
 		} else {
-			break
+			items = append(items, *b)
 		}
 	}
+	// for !p.is(lex.RBRACE) {
+	// 	if item := p.ParseBlockItem(); item != nil {
+	// 		items = append(items, *item)
+	// 	} else {
+	// 		break
+	// 	}
+	// }
 
 	return items
 }
 
 func (p *Parser) ParseDecl() ast.Decl {
-	var decl ast.Decl
-
 	switch p.curr.Type {
 	case lex.INT:
-		decl = p.parse_simple_decl()
-	}
-
-	if decl == nil {
-		p.panic()
+		return p.parse_simple_decl()
+	default:
 		return nil
 	}
-
-	return decl
 }
 func (p *Parser) parse_simple_decl() *ast.Declaration {
 	decl := ast.Declaration{}
@@ -62,7 +65,9 @@ func (p *Parser) parse_simple_decl() *ast.Declaration {
 	// vtype := p.curr.Type
 	p.adv()
 
-	p.expect(lex.IDENT)
+	if !p.expect(lex.IDENT) {
+		return nil
+	}
 	decl.Name = p.curr.Literal
 	p.adv()
 
@@ -72,13 +77,21 @@ func (p *Parser) parse_simple_decl() *ast.Declaration {
 		return &decl
 	}
 
-	p.exadv(lex.ASSIGN)
+	if !p.expect(lex.ASSIGN) {
+		return nil
+	}
+	p.adv()
+
 	init := p.ParseExpr(LOWEST)
 	if init == nil {
 		return nil
 	}
 	p.adv()
-	p.exadv(lex.SCOLON)
+
+	if !p.expect(lex.SCOLON) {
+		return nil
+	}
+	p.adv()
 
 	decl.Init = init
 	return &decl
