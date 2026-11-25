@@ -42,6 +42,21 @@ func (p *Parser) ParseBlockItems() []ast.BlockItem {
 }
 
 func (p *Parser) ParseDecl() ast.Decl {
+	var decl ast.Decl
+
+	switch p.curr.Type {
+	case lex.INT:
+		decl = p.parse_simple_decl()
+	}
+
+	if decl == nil {
+		p.panic()
+		return nil
+	}
+
+	return decl
+}
+func (p *Parser) parse_simple_decl() *ast.Declaration {
 	decl := ast.Declaration{}
 
 	// vtype := p.curr.Type

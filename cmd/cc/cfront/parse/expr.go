@@ -175,10 +175,15 @@ func (p *Parser) parsePrefix() ast.Expr {
 			return inner
 		}
 	default:
-		util.Exit_with_printf("unknown token type %s\n", ttype.String())
+		tok := p.curr
+		err := ParserError{
+			File:  tok.File,
+			Line:  tok.Line,
+			Error: ErrUnknownToken,
+		}
+		p.Err = append(p.Err, err)
+		return nil
 	}
-
-	return nil
 }
 
 func (p *Parser) parse_prefix_operator() ast.Expr {

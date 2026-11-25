@@ -6,18 +6,27 @@ import (
 )
 
 func (p *Parser) ParseStmt() ast.Stmt {
+	var stmt ast.Stmt
+
 	switch p.curr.Type {
 	case lex.RETURN:
 		p.adv()
-		return p.parse_return_stmt()
+		stmt = p.parse_return_stmt()
 	case lex.IF:
 		p.adv()
-		return p.parse_if_stmt()
+		stmt = p.parse_if_stmt()
 	case lex.LBRACE:
-		return p.parse_compound_stmt()
+		stmt = p.parse_compound_stmt()
 	default:
-		return p.parse_expr_stmt()
+		stmt = p.parse_expr_stmt()
 	}
+
+	if stmt == nil {
+		p.panic()
+		return nil
+	}
+
+	return stmt
 }
 
 func (p *Parser) parse_return_stmt() *ast.ReturnStmt {

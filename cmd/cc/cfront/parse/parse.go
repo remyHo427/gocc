@@ -98,5 +98,14 @@ func (p *Parser) expect(ttype lex.Toktype) {
 			Error: ErrUnexpectedToken,
 		}
 		p.Err = append(p.Err, e)
+		p.panic()
+	}
+}
+func (p *Parser) panic() {
+	for {
+		if tok := p.curr; tok.Type == lex.SCOLON || tok.Type == lex.EOF {
+			break
+		}
+		p.adv()
 	}
 }

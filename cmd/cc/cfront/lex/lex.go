@@ -62,7 +62,7 @@ func (l *Lexer) Lex() Token {
 		}
 		if punct, ok := punct_map[c]; ok {
 			l.adv()
-			return punct
+			return l.tok(punct)
 		}
 
 		var ttype Toktype
@@ -71,76 +71,76 @@ func (l *Lexer) Lex() Token {
 			l.adv()
 			l.match("..", ELLIP, &ttype)
 			l.match("", DOT, &ttype)
-			return tok(ttype)
+			return l.tok(ttype)
 		case '+':
 			l.adv()
 			l.match("+", INC, &ttype)
 			l.match("=", ADD_ASSIGN, &ttype)
 			l.match("", ADD, &ttype)
-			return tok(ttype)
+			return l.tok(ttype)
 		case '-':
 			l.adv()
 			l.match("-", DEC, &ttype)
 			l.match("=", SUB_ASSIGN, &ttype)
 			l.match(">", ARROW, &ttype)
 			l.match("", SUB, &ttype)
-			return tok(ttype)
+			return l.tok(ttype)
 		case '*':
 			l.adv()
 			l.match("=", MUL_ASSIGN, &ttype)
 			l.match("", MUL, &ttype)
-			return tok(ttype)
+			return l.tok(ttype)
 		case '%':
 			l.adv()
 			l.match("=", MOD_ASSIGN, &ttype)
 			l.match("", MOD, &ttype)
-			return tok(ttype)
+			return l.tok(ttype)
 		case '/':
 			l.adv()
 			l.match("=", DIV_ASSIGN, &ttype)
 			l.match("", DIV, &ttype)
-			return tok(ttype)
+			return l.tok(ttype)
 		case '<':
 			l.adv()
 			l.match("<=", LS_ASSIGN, &ttype)
 			l.match("<", LSHIFT, &ttype)
 			l.match("=", LEQ, &ttype)
 			l.match("", LT, &ttype)
-			return tok(ttype)
+			return l.tok(ttype)
 		case '>':
 			l.adv()
 			l.match(">=", RS_ASSIGN, &ttype)
 			l.match(">", RSHIFT, &ttype)
 			l.match("=", GEQ, &ttype)
 			l.match("", GT, &ttype)
-			return tok(ttype)
+			return l.tok(ttype)
 		case '&':
 			l.adv()
 			l.match("&", AND, &ttype)
 			l.match("=", BA_ASSIGN, &ttype)
 			l.match("", BAND, &ttype)
-			return tok(ttype)
+			return l.tok(ttype)
 		case '|':
 			l.adv()
 			l.match("|", OR, &ttype)
 			l.match("=", BO_ASSIGN, &ttype)
 			l.match("", BOR, &ttype)
-			return tok(ttype)
+			return l.tok(ttype)
 		case '^':
 			l.adv()
 			l.match("=", XO_ASSIGN, &ttype)
 			l.match("", BXOR, &ttype)
-			return tok(ttype)
+			return l.tok(ttype)
 		case '!':
 			l.adv()
 			l.match("=", NEQ, &ttype)
 			l.match("", NOT, &ttype)
-			return tok(ttype)
+			return l.tok(ttype)
 		case '=':
 			l.adv()
 			l.match("=", EQ, &ttype)
 			l.match("", ASSIGN, &ttype)
-			return tok(ttype)
+			return l.tok(ttype)
 		default:
 			l.error(ErrInvalidCharacter)
 			l.adv()
@@ -167,7 +167,7 @@ func (l *Lexer) word() Token {
 
 	s := string(l.Src[start:end])
 	if kwtok, ok := kw_map[s]; ok {
-		return kwtok
+		return l.tok(kwtok)
 	}
 
 	return Token{
@@ -227,6 +227,10 @@ func (l *Lexer) adv() {
 	l.col++
 	l.Sp++
 }
-func tok(ttype Toktype) Token {
-	return Token{Type: ttype}
+func (l *Lexer) tok(ttype Toktype) Token {
+	return Token{
+		File: l.file,
+		Line: l.line,
+		Type: ttype,
+	}
 }
