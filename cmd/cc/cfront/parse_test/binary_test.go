@@ -344,12 +344,12 @@ func TestPrecedenceLevels(t *testing.T) {
 		},
 		// >= with << >>
 		{
-			Name:   "greater than with left shift",
+			Name:   "greater than or equal with left shift",
 			Src:    "1 >= 2 << 3",
 			Expect: "(binary GEQ 1 (binary LSHIFT 2 3))",
 		},
 		{
-			Name:   "greater than with right shift",
+			Name:   "greater than or euqal with right shift",
 			Src:    "1 >= 2 >> 3",
 			Expect: "(binary GEQ 1 (binary RSHIFT 2 3))",
 		},

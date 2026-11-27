@@ -70,6 +70,108 @@ func TestCompoundStmt(t *testing.T) {
 	check_stmt(t, tt)
 }
 
+func TestWhileStmt(t *testing.T) {
+	tt := []unittest.NamedTestPair{
+		{
+			Name:   "with simple condition",
+			Src:    "while (1) 2;",
+			Expect: "(while 1 2)",
+		},
+		{
+			Name:   "with complex condition",
+			Src:    "while (a != 10) a = a + 1;",
+			Expect: "(while (binary NEQ a 10) (assign a (binary ADD a 1)))",
+		},
+		{
+			Name:   "with null stmt",
+			Src:    "while (1) ;",
+			Expect: "(while 1 (null))",
+		},
+		{
+			Name:   "with block body",
+			Src:    "while (1) { return 1; }",
+			Expect: "(while 1 (compound (block (return 1))))",
+		},
+	}
+	check_stmt(t, tt)
+}
+func TestDoWhileStmt(t *testing.T) {
+	tt := []unittest.NamedTestPair{
+		{
+			Name:   "with simple condition",
+			Src:    "do 2; while (1);",
+			Expect: "(do-while 2 1)",
+		},
+		{
+			Name:   "with complex condition",
+			Src:    "do a = a + 1; while (a != 10);",
+			Expect: "(do-while (assign a (binary ADD a 1)) (binary NEQ a 10))",
+		},
+		{
+			Name:   "with null stmt",
+			Src:    "do ; while (1);",
+			Expect: "(do-while (null) 1)",
+		},
+		{
+			Name:   "with block body",
+			Src:    "do { return 2; } while (1);",
+			Expect: "(do-while (compound (block (return 2))) 1)",
+		},
+	}
+	check_stmt(t, tt)
+}
+func TestForStmt(t *testing.T) {
+	tt := []unittest.NamedTestPair{
+		{
+			Name:   "no init, no cond, no post",
+			Src:    "for (;;) ;",
+			Expect: "(for (null) (null) (null) (null))",
+		},
+		{
+			Name:   "decl init, no cond, no post",
+			Src:    "for (int a;;) ;",
+			Expect: "(for (declaration a ) (null) (null) (null))",
+		},
+		{
+			Name:   "expr init, no cond, no post",
+			Src:    "for (1;;) ;",
+			Expect: "(for 1 (null) (null) (null))",
+		},
+		{
+			Name:   "no init, expr cond, no post",
+			Src:    "for (;2;) ;",
+			Expect: "(for (null) 2 (null) (null))",
+		},
+		{
+			Name:   "no init, no cond, expr post",
+			Src:    "for (;;3) ;",
+			Expect: "(for (null) (null) 3 (null))",
+		},
+		{
+			Name:   "init, cond, post",
+			Src:    "for (1;2;3) ;",
+			Expect: "(for 1 2 3 (null))",
+		},
+	}
+	check_stmt(t, tt)
+}
+
+func TestMiscStmts(t *testing.T) {
+	tt := []unittest.NamedTestPair{
+		{
+			Name:   "break",
+			Src:    "break;",
+			Expect: "(break)",
+		},
+		{
+			Name:   "continue",
+			Src:    "continue;",
+			Expect: "(continue)",
+		},
+	}
+	check_stmt(t, tt)
+}
+
 func check_stmt(t *testing.T, tt []unittest.NamedTestPair) {
 	unittest.TestPair(t, parse_stmt, tt)
 }
