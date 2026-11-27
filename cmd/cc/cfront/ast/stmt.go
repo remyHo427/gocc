@@ -107,9 +107,6 @@ type ForStmt struct {
 
 func (s *ForStmt) StmtNode() {}
 func (s *ForStmt) String() string {
-	// return join("for")
-	// return join("for", s.Init.String())
-
 	var cond, post string
 
 	if s.Condition == nil {

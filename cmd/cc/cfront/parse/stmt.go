@@ -227,21 +227,9 @@ func (p *Parser) parse_for_stmt() *ast.ForStmt {
 		return nil
 	}
 
-	var post *ast.Expr
-	if p.is(lex.RPAREN) { // post is null
-		post = nil
-		p.adv()
-	} else {
-		post_expr := p.ParseExpr(LOWEST)
-		if post_expr == nil {
-			return nil
-		}
-		post = &post_expr
-		p.adv()
-		if !p.expect(lex.RPAREN) {
-			return nil
-		}
-		p.adv()
+	post, ok := p.parse_for_post_expr()
+	if !ok {
+		return nil
 	}
 
 	body := p.ParseStmt()
@@ -255,6 +243,26 @@ func (p *Parser) parse_for_stmt() *ast.ForStmt {
 		Post:      post,
 		Body:      body,
 	}
+}
+
+func (p *Parser) parse_for_post_expr() (*ast.Expr, bool) {
+	if p.is(lex.RPAREN) { // post expr is omitted
+		p.adv()
+		return nil, true
+	}
+
+	expr := p.ParseExpr(LOWEST)
+	if expr == nil {
+		return nil, false
+	}
+	p.adv()
+
+	if !p.expect(lex.RPAREN) {
+		return nil, false
+	}
+	p.adv()
+
+	return &expr, true
 }
 
 func (p *Parser) parse_for_init() *ast.ForInit {

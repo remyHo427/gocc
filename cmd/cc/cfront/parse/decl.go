@@ -40,13 +40,6 @@ func (p *Parser) ParseBlockItems() []ast.BlockItem {
 			items = append(items, *b)
 		}
 	}
-	// for !p.is(lex.RBRACE) {
-	// 	if item := p.ParseBlockItem(); item != nil {
-	// 		items = append(items, *item)
-	// 	} else {
-	// 		break
-	// 	}
-	// }
 
 	return items
 }
